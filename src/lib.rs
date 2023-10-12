@@ -8,6 +8,10 @@ pub mod note{
     //S1:Source,
     //S2:Source,
     //{}
+    fn build_scale(){
+
+    }
+
 
     pub fn octave(x:f32,o:i32)->f32{
         x*(2.0_f64.powi(o)as f32)
