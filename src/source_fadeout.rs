@@ -2,15 +2,15 @@ use std::time::Duration;
 
 use rodio::{Sample, Source};
 
-/// Internal function that builds a `FadeIn` object.
-pub fn fadein<I>(input: I, duration: Duration) -> FadeIn<I>
+/// Internal function that builds a `FadeOut` object.
+pub fn FadeOut<I>(input: I, duration: Duration) -> FadeOut<I>
 where
     I: Source,
     I::Item: Sample,
 {
     let duration = duration.as_secs() * 1000000000 + duration.subsec_nanos() as u64;
 
-    FadeIn {
+    FadeOut {
         input,
         remaining_ns: duration as f32,
         total_ns: duration as f32,
@@ -19,13 +19,13 @@ where
 
 /// Filter that modifies raises the volume from silence over a time period.
 #[derive(Clone, Debug)]
-pub struct FadeIn<I> {
+pub struct FadeOut<I> {
     input: I,
     remaining_ns: f32,
     total_ns: f32,
 }
 
-impl<I> FadeIn<I>
+impl<I> FadeOut<I>
 where
     I: Source,
     I::Item: Sample,
@@ -49,7 +49,7 @@ where
     }
 }
 
-impl<I> Iterator for FadeIn<I>
+impl<I> Iterator for FadeOut<I>
 where
     I: Source,
     I::Item: Sample,
@@ -74,14 +74,14 @@ where
     }
 }
 
-impl<I> ExactSizeIterator for FadeIn<I>
+impl<I> ExactSizeIterator for FadeOut<I>
 where
     I: Source + ExactSizeIterator,
     I::Item: Sample,
 {
 }
 
-impl<I> Source for FadeIn<I>
+impl<I> Source for FadeOut<I>
 where
     I: Source,
     I::Item: Sample,
