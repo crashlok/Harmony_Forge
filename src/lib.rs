@@ -1,5 +1,3 @@
+pub mod source_fadeout;
 
-mod source_fadeout;
-
-
-pub mod note; 
+pub mod note;
