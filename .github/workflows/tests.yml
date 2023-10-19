@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: install alsa
-      run: sudo apt instal alsa-sys
+      run: sudo apt install alsa-sys
       shell: bash
     - name: Build
       run: cargo build --verbose
