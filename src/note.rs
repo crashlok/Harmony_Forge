@@ -1,5 +1,5 @@
 use rodio::{
-    source::{Delay, FadeIn, SineWave, TakeDuration},
+    source::{SineWave, TakeDuration},
     Source,
 };
 use std::time::Duration;
@@ -89,14 +89,12 @@ pub fn octave(x: f32, o: i32) -> f32 {
     x * (2.0_f64.powi(o) as f32)
 }
 
-pub fn sine_wave_octave(freq: f32, duration: f32, o: i32) -> FadeIn<TakeDuration<SineWave>> {
+pub fn sine_wave_octave(freq: f32, duration: f32, o: i32) -> TakeDuration<SineWave> {
     sine_wave(octave(freq, o), duration)
 }
 
-pub fn sine_wave(freq: f32, duration: f32) -> FadeIn<TakeDuration<SineWave>> {
-    SineWave::new(freq)
-        .take_duration_fadeout(Duration::from_secs_f32(duration))
-        .fade_in(Duration::from_secs_f32(0.05))
+pub fn sine_wave(freq: f32, duration: f32) -> TakeDuration<SineWave> {
+    SineWave::new(freq).take_duration_fadeout(Duration::from_secs_f32(duration))
 }
 
 pub fn pause(duration: f32) -> TakeDuration<SineWave> {
