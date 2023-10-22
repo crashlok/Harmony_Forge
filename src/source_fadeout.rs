@@ -1,6 +1,24 @@
 use std::time::Duration;
 
-use rodio::{Sample, Source};
+use rodio::{source::TakeDuration, Sample, Source};
+
+trait SourceUpgrade {
+    fn take_duration_fadeout(self, duration: Duration) -> TakeDuration<Self>
+    where
+        Self: Sized;
+}
+
+impl<S> SourceUpgrade for S
+where
+    S: Source,
+    S::Item: Sample,
+{
+    fn take_duration_fadeout(self, duration: Duration) -> TakeDuration<Self> {
+        let mut t = self.take_duration(duration);
+        t.set_filter_fadeout();
+        t
+    }
+}
 
 /// Internal function that builds a `FadeOut` object.
 pub fn FadeOut<I>(input: I, duration: Duration, inputs_duration: f32) -> FadeOut<I>
@@ -13,7 +31,7 @@ where
     //+ input.total_duration().unwrap().subsec_nanos() as u64;
     FadeOut {
         input,
-        ns_from_start: -(inputs_duration*1000000000.0 - duration as f32),
+        ns_from_start: -(inputs_duration * 1000000000.0 - duration as f32),
         total_ns: duration as f32,
     }
 }
