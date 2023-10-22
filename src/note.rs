@@ -4,6 +4,8 @@ use rodio::{
 };
 use std::time::Duration;
 
+use crate::source_fadeout::SourceUpgrade;
+
 #[derive(Debug)]
 pub enum Step {
     Minor(usize),
@@ -25,7 +27,7 @@ impl Scale {
 
     pub fn new_major(key_freq: f32) -> Scale {
         Scale {
-            key_freq: key_freq,
+            key_freq,
             steps: vec![
                 Step::Normal(1),
                 Step::Major(2),
@@ -41,7 +43,7 @@ impl Scale {
 
     pub fn new_minor(key_freq: f32) -> Scale {
         Scale {
-            key_freq: key_freq,
+            key_freq,
             steps: vec![
                 Step::Normal(1),
                 Step::Major(2),
@@ -87,19 +89,18 @@ pub fn octave(x: f32, o: i32) -> f32 {
     x * (2.0_f64.powi(o) as f32)
 }
 
-pub fn sine_wave_octave(freq: f32, duration: f32, o: i32) -> Delay<FadeIn<TakeDuration<SineWave>>> {
+pub fn sine_wave_octave(freq: f32, duration: f32, o: i32) -> FadeIn<TakeDuration<SineWave>> {
     sine_wave(octave(freq, o), duration)
 }
 
-pub fn sine_wave(freq: f32, duration: f32) -> Delay<FadeIn<TakeDuration<SineWave>>> {
+pub fn sine_wave(freq: f32, duration: f32) -> FadeIn<TakeDuration<SineWave>> {
     SineWave::new(freq)
-        .take_duration(Duration::from_secs_f32(duration))
+        .take_duration_fadeout(Duration::from_secs_f32(duration))
         .fade_in(Duration::from_secs_f32(0.05))
-        .delay(Duration::from_secs_f32(1.0))
 }
 
-pub fn pause(duration: f32) -> Delay<FadeIn<TakeDuration<SineWave>>> {
-    sine_wave(0., duration)
+pub fn pause(duration: f32) -> TakeDuration<SineWave> {
+    SineWave::new(0.0).take_duration(Duration::from_secs_f32(duration))
 }
 
 #[cfg(test)]

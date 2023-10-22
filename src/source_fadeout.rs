@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use rodio::{source::TakeDuration, Sample, Source};
 
-trait SourceUpgrade {
+pub trait SourceUpgrade {
     fn take_duration_fadeout(self, duration: Duration) -> TakeDuration<Self>
     where
         Self: Sized;
