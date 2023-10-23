@@ -6,12 +6,13 @@ use std::time::Duration;
 
 use crate::source_fadeout::SourceUpgrade;
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum Step {
     Minor(usize),
     Major(usize),
     Normal(usize),
 }
+#[derive(Clone, Debug)]
 pub struct Scale {
     key_freq: f32,
     steps: Vec<Step>,
