@@ -1,10 +1,6 @@
-use rodio::{
-    source::{SineWave, TakeDuration},
-    Source,
-};
-use std::time::Duration;
-
-use crate::source_fadeout::SourceUpgrade;
+pub mod chords;
+mod scales;
+pub mod tone;
 
 #[derive(Clone, Debug, Copy)]
 pub enum Step {
@@ -24,38 +20,6 @@ impl Scale {
             .iter()
             .map(|s| step_as_freq(s, self.key_freq))
             .collect()
-    }
-
-    pub fn new_major(key_freq: f32) -> Scale {
-        Scale {
-            key_freq,
-            steps: vec![
-                Step::Normal(1),
-                Step::Major(2),
-                Step::Major(3),
-                Step::Minor(4),
-                Step::Normal(5),
-                Step::Major(6),
-                Step::Major(7),
-                Step::Normal(8),
-            ],
-        }
-    }
-
-    pub fn new_minor(key_freq: f32) -> Scale {
-        Scale {
-            key_freq,
-            steps: vec![
-                Step::Normal(1),
-                Step::Major(2),
-                Step::Major(3),
-                Step::Minor(4),
-                Step::Normal(5),
-                Step::Major(6),
-                Step::Major(7),
-                Step::Normal(8),
-            ],
-        }
     }
 }
 
@@ -83,33 +47,5 @@ fn step_to_chromatic(step: &Step) -> usize {
         Step::Major(7) => 12,
         Step::Normal(8) => 13,
         _ => panic!("dont now what {:?} is", step),
-    }
-}
-
-pub fn octave(x: f32, o: i32) -> f32 {
-    x * (2.0_f64.powi(o) as f32)
-}
-
-pub fn sine_wave_octave(freq: f32, duration: f32, o: i32) -> TakeDuration<SineWave> {
-    sine_wave(octave(freq, o), duration)
-}
-
-pub fn sine_wave(freq: f32, duration: f32) -> TakeDuration<SineWave> {
-    SineWave::new(freq).take_duration_fadeout(Duration::from_secs_f32(duration))
-}
-
-pub fn pause(duration: f32) -> TakeDuration<SineWave> {
-    SineWave::new(0.0).take_duration(Duration::from_secs_f32(duration))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn octaviert() {
-        assert_eq!(octave(440.0, -1), 220.0);
-        assert_eq!(octave(440.0, 1), 880.0);
-        assert_eq!(octave(440.0, 0), 440.0);
     }
 }

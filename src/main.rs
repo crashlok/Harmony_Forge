@@ -10,5 +10,10 @@ fn main() {
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let sink = Sink::try_new(&stream_handle).unwrap();
     let sink2 = Sink::try_new(&stream_handle).unwrap();
-    MusicGenerator::new([[Step::Normal(0); 3]; 4], Scale::new_minor(A), 0).play(sink, sink2)
+    MusicGenerator::new(
+        [[Step::Normal(1), Step::Major(3), Step::Normal(5)]],
+        scale::new_major(a),
+        0,
+    )
+    .play(sink, sink2)
 }

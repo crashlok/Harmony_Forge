@@ -1,4 +1,4 @@
-use crate::note::{sine_wave, sine_wave_octave, Scale, Step};
+use crate::note::{chords, tone::sine_wave_octave, Scale, Step};
 use rand::{
     distributions::{Distribution, Uniform},
     thread_rng,
@@ -7,7 +7,7 @@ use rodio::Sink;
 
 #[derive(Clone, Debug)]
 pub struct MusicGenerator {
-    chords: [[Step; 3]; 4],
+    chords: [chords::Triad; 4],
     scale: Scale,
     mood: i8,
 }
