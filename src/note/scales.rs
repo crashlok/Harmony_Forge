@@ -23,11 +23,11 @@ impl Scale {
             steps: vec![
                 Step::Normal(1),
                 Step::Major(2),
-                Step::Major(3),
+                Step::Minor(3),
                 Step::Minor(4),
                 Step::Normal(5),
-                Step::Major(6),
-                Step::Major(7),
+                Step::Minor(6),
+                Step::Minor(7),
                 Step::Normal(8),
             ],
         }

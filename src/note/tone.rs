@@ -5,16 +5,19 @@ use rodio::{
 };
 use std::time::Duration;
 
-pub fn chord<S>(tones: [S; 5]) -> Mix<Mix<Mix<Mix<S, S>, S>, S>, S>
+pub type ChordSource<S> = Mix<Mix<Mix<Mix<S, S>, S>, S>, S>;
+
+pub fn chord<S>(tones: Vec<S>) -> ChordSource<S>
 where
-    S: Source + Copy,
+    S: Source + Clone,
     S::Item: Sample,
 {
     tones[0]
-        .mix(tones[1])
-        .mix(tones[2])
-        .mix(tones[3])
-        .mix(tones[4])
+        .clone()
+        .mix(tones[1].clone())
+        .mix(tones[2].clone())
+        .mix(tones[3].clone())
+        .mix(tones[4].clone())
 }
 
 pub fn octave(x: f32, o: i32) -> f32 {
