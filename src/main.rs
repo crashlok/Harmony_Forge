@@ -18,8 +18,8 @@ fn main() {
         [
             Chord::new_minor_seventh(a_major.as_freq()[2 - 1]),
             Chord::new_dominant_seventh(a_major.as_freq()[5 - 1]),
-            Chord::new_major_seventh(a_major.as_freq()[1 - 1]),
-            Chord::new_major_seventh(a_major.as_freq()[1 - 1]),
+            Chord::new_major_seventh(a_major.as_freq()[0]),
+            Chord::new_major_seventh(a_major.as_freq()[0]),
         ],
         a_major,
         0,
