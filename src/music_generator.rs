@@ -21,7 +21,7 @@ where
     M: MelodyGen,
 {
     rx: mpsc::Receiver<()>,
-    player: Weak<Midiplayer>,
+    player: Weak<MidiPlayer>,
     melody_gen: M,
     chord_gen: C,
 }
@@ -40,7 +40,7 @@ where
             chord_gen,
         };
 
-        let midi_player = Midiplayer::new(m);
+        let midi_player = MidiPlayer::new(m);
         m.player = Rc::downgrade(&Rc::new(midi_player));
         tx
     }

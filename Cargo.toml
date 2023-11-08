@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8"
-rodio = "0.17.2"
 midir = "0.9.1"
 midly = "0.5.3"
 nodi = "0.19.2"
