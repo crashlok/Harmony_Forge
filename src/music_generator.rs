@@ -1,54 +1,79 @@
-use crate::note::{
-    chords::{self, Chord},
-    tone::sine_wave_octave,
-    Scale, Step,
-};
+use nodi::{Event, Moment};
 use rand::{
     distributions::{Distribution, Uniform},
     thread_rng,
 };
-use rodio::Sink;
+use std::{
+    rc::{Rc, Weak},
+    sync::mpsc,
+};
 
-#[derive(Clone, Debug)]
-pub struct MusicGenerator {
-    chords: [Chord; 4],
-    scale: Scale,
-    mood: i8,
-    chord_counter: usize,
+use midi_player::MidiPlayer;
+
+pub mod chord_generators;
+pub mod melody_generators;
+mod midi_player;
+
+#[derive(Debug)]
+pub struct MusicGenerator<C, M>
+where
+    C: ChordGen,
+    M: MelodyGen,
+{
+    rx: mpsc::Receiver<()>,
+    player: Weak<Midiplayer>,
+    melody_gen: M,
+    chord_gen: C,
 }
 
-impl MusicGenerator {
-    pub fn new(chords: [Chord; 4], scale: Scale, mood: i8) -> MusicGenerator {
-        MusicGenerator {
-            chords,
-            scale,
-            mood,
-            chord_counter: 0,
-        }
-    }
+impl<C, M> MusicGenerator<C, M>
+where
+    C: ChordGen,
+    M: MelodyGen,
+{
+    pub fn new(chord_gen: C, melody_gen: M) -> mpsc::Sender<()> {
+        let (tx, rx) = mpsc::channel();
+        let m = MusicGenerator {
+            rx,
+            player: Weak::new(),
+            melody_gen,
+            chord_gen,
+        };
 
-    pub fn play(&mut self, chord_sink: Sink, melody_sink: Sink) {
-        loop {
-            if melody_sink.len() <= 4 {
-                melody_sink.append(sine_wave_octave(self.gen_melody_note(), 0.25, -1));
-            }
-
-            if chord_sink.len() <= 4 {
-                melody_sink.append(self.chords[self.chord_counter].as_sine_wave(1., -2));
-                self.chord_counter += 1;
-                if self.chord_counter >= self.chords.len() {
-                    self.chord_counter = 0
-                }
-            }
-        }
+        let midi_player = Midiplayer::new(m);
+        m.player = Rc::downgrade(&Rc::new(midi_player));
+        tx
     }
+}
 
-    fn gen_melody_note(&self) -> f32 {
-        let scale = self.scale.as_freq();
-        scale[Uniform::from(0..scale.len()).sample(&mut thread_rng())]
-    }
+impl<C, M> Iterator for MusicGenerator<C, M>
+where
+    C: ChordGen,
+    M: MelodyGen,
+{
+    type Item = nodi::Moment;
 
-    pub fn set_mood(&mut self, mood: i8) -> Self {
-        todo!()
+    fn next(&mut self) -> Option<Self::Item> {
+        let result: Moment = Moment { events: Vec::new() };
+
+        self.chord_gen
+            .gen()
+            .iter()
+            .map(|message| result.push(*message));
+
+        self.melody_gen
+            .gen()
+            .iter()
+            .map(|message| result.push(*message));
+
+        Some(result)
     }
+}
+
+trait MelodyGen {
+    fn gen(&mut self) -> &[Event];
+}
+
+trait ChordGen {
+    fn gen(&mut self) -> &[Event];
 }
