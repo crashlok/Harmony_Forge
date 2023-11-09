@@ -1,4 +1,6 @@
-use nodi::{Event, Moment};
+use midir::MidiOutputConnection;
+use midly::live::SystemCommon;
+use nodi::{timers::Ticker, Event, Moment};
 use rand::{
     distributions::{Distribution, Uniform},
     thread_rng,
@@ -6,6 +8,7 @@ use rand::{
 use std::{
     rc::{Rc, Weak},
     sync::mpsc,
+    thread,
 };
 
 use midi_player::MidiPlayer;
@@ -14,14 +17,13 @@ pub mod chord_generators;
 pub mod melody_generators;
 mod midi_player;
 
-#[derive(Debug)]
+//#[derive(Debug)]
 pub struct MusicGenerator<C, M>
 where
     C: ChordGen,
     M: MelodyGen,
 {
-    rx: mpsc::Receiver<()>,
-    player: Weak<MidiPlayer>,
+    rx: Option<mpsc::Receiver<()>>,
     melody_gen: M,
     chord_gen: C,
 }
@@ -31,17 +33,22 @@ where
     C: ChordGen,
     M: MelodyGen,
 {
-    pub fn new(chord_gen: C, melody_gen: M) -> mpsc::Sender<()> {
-        let (tx, rx) = mpsc::channel();
-        let m = MusicGenerator {
-            rx,
-            player: Weak::new(),
+    pub fn new(chord_gen: C, melody_gen: M) -> Self {
+        MusicGenerator {
+            rx: None,
             melody_gen,
             chord_gen,
-        };
+        }
 
-        let midi_player = MidiPlayer::new(m);
-        m.player = Rc::downgrade(&Rc::new(midi_player));
+        //let midi_player = MidiPlayer::new(m);
+        //m.player = Rc::downgrade(&Rc::new(midi_player));
+    }
+
+    pub fn play(mut self, t: Ticker, con: MidiOutputConnection) -> mpsc::Sender<()> {
+        let (tx, rx) = mpsc::channel();
+        self.rx = Some(rx);
+        let midi_player = MidiPlayer::new(self, con, t);
+        thread::spawn(move || midi_player.play());
         tx
     }
 }
@@ -54,26 +61,24 @@ where
     type Item = nodi::Moment;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let result: Moment = Moment { events: Vec::new() };
+        let mut result: Moment = Moment { events: Vec::new() };
 
-        self.chord_gen
-            .gen()
-            .iter()
-            .map(|message| result.push(*message));
+        for message in self.chord_gen.gen() {
+            result.push(*message)
+        }
 
-        self.melody_gen
-            .gen()
-            .iter()
-            .map(|message| result.push(*message));
+        for message in self.melody_gen.gen() {
+            result.push(*message)
+        }
 
         Some(result)
     }
 }
 
-trait MelodyGen {
+pub trait MelodyGen {
     fn gen(&mut self) -> &[Event];
 }
 
-trait ChordGen {
+pub trait ChordGen {
     fn gen(&mut self) -> &[Event];
 }

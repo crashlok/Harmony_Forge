@@ -1,29 +1,25 @@
+use midir::MidiOutputConnection;
 use nodi::{Connection, Event, Moment, Timer};
-use rand::seq::IteratorRandom;
-use std::rc::Rc;
-
-#[derive(Debug)]
-pub struct MidiPlayer<T, C, I>
+//#[derive(Debug)]
+pub struct MidiPlayer<T, I>
 where
     T: Timer,
-    C: Connection,
     I: Iterator<Item = Moment>,
 {
-    generator: Rc<I>,
+    generator: I,
     /// An active midi connection.
-    pub con: C,
+    pub con: MidiOutputConnection,
     timer: T,
 }
 
-impl<I, C, T> MidiPlayer<T, C, I>
+impl<I, T> MidiPlayer<T, I>
 where
     T: Timer,
-    C: Connection,
     I: Iterator<Item = Moment>,
 {
-    pub fn new(generator: I, con: C, timer: T) -> Self {
+    pub fn new(generator: I, con: MidiOutputConnection, timer: T) -> Self {
         MidiPlayer {
-            generator: Rc::new(generator),
+            generator,
             con,
             timer,
         }
@@ -44,9 +40,10 @@ where
                     match event {
                         Event::Tempo(val) => self.timer.change_tempo(*val),
                         Event::Midi(msg) => {
-                            if !self.con.play(*msg) {
+                            if !play(self.con, *msg) {
                                 panic!()
                             }
+                            todo!()
                         }
                         _ => (),
                     };
@@ -56,4 +53,12 @@ where
             counter += 1;
         }
     }
+}
+
+fn play(mut con: midir::MidiOutputConnection, msg: nodi::MidiEvent) -> bool {
+    let mut buf = Vec::with_capacity(8);
+    let _ = msg.write(&mut buf);
+
+    let _ = con.send(&buf);
+    true
 }
