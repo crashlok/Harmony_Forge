@@ -1,15 +1,6 @@
 use midir::MidiOutputConnection;
-use midly::live::SystemCommon;
 use nodi::{timers::Ticker, Event, Moment};
-use rand::{
-    distributions::{Distribution, Uniform},
-    thread_rng,
-};
-use std::{
-    rc::{Rc, Weak},
-    sync::mpsc,
-    thread,
-};
+use std::{sync::mpsc, thread};
 
 use midi_player::MidiPlayer;
 
@@ -20,8 +11,8 @@ mod midi_player;
 //#[derive(Debug)]
 pub struct MusicGenerator<C, M>
 where
-    C: ChordGen,
-    M: MelodyGen,
+    C: ChordGen + Send + 'static,
+    M: MelodyGen + Send + 'static,
 {
     rx: Option<mpsc::Receiver<()>>,
     melody_gen: M,
@@ -30,8 +21,8 @@ where
 
 impl<C, M> MusicGenerator<C, M>
 where
-    C: ChordGen,
-    M: MelodyGen,
+    C: ChordGen + Send + 'static,
+    M: MelodyGen + Send + 'static,
 {
     pub fn new(chord_gen: C, melody_gen: M) -> Self {
         MusicGenerator {
@@ -39,15 +30,12 @@ where
             melody_gen,
             chord_gen,
         }
-
-        //let midi_player = MidiPlayer::new(m);
-        //m.player = Rc::downgrade(&Rc::new(midi_player));
     }
 
     pub fn play(mut self, t: Ticker, con: MidiOutputConnection) -> mpsc::Sender<()> {
         let (tx, rx) = mpsc::channel();
         self.rx = Some(rx);
-        let midi_player = MidiPlayer::new(self, con, t);
+        let mut midi_player = MidiPlayer::new(self, con, t);
         thread::spawn(move || midi_player.play());
         tx
     }
@@ -55,8 +43,8 @@ where
 
 impl<C, M> Iterator for MusicGenerator<C, M>
 where
-    C: ChordGen,
-    M: MelodyGen,
+    C: ChordGen + Send + 'static,
+    M: MelodyGen + Send + 'static,
 {
     type Item = nodi::Moment;
 
