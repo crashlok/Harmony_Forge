@@ -61,7 +61,7 @@ impl Chord {
     pub fn as_midi_notes(&self) -> Vec<f32> {
         self.steps
             .iter()
-            .map(|s| step_as_chromatic(s) + key_note)
+            .map(|s| s.as_chromatic() + key_note)
             .collect()
     }
 
