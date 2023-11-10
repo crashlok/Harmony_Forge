@@ -10,15 +10,15 @@ pub enum Step {
 }
 #[derive(Clone, Debug)]
 pub struct Scale {
-    key_freq: f32,
+    key_note: i32,
     steps: Vec<Step>,
 }
 
 impl Scale {
-    pub fn as_freq(&self) -> Vec<f32> {
+    pub fn as_midi_notes(&self) -> Vec<f32> {
         self.steps
             .iter()
-            .map(|s| step_as_freq(s, self.key_freq))
+            .map(|s| step_as_chromatic(s, self.key_freq) + key_note)
             .collect()
     }
 }

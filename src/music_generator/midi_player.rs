@@ -1,13 +1,13 @@
 use midir::MidiOutputConnection;
-use nodi::{Connection, Event, Moment, Timer};
-//#[derive(Debug)]
+use nodi::{Event, Moment, Timer};
+
+#[derive()]
 pub struct MidiPlayer<T, I>
 where
     T: Timer,
     I: Iterator<Item = Moment>,
 {
-    generator: I,
-    /// An active midi connection.
+    generator: Box<I>,
     pub con: MidiOutputConnection,
     timer: T,
 }
@@ -19,7 +19,7 @@ where
 {
     pub fn new(generator: I, con: MidiOutputConnection, timer: T) -> Self {
         MidiPlayer {
-            generator,
+            generator: Box::new(generator),
             con,
             timer,
         }
@@ -28,7 +28,7 @@ where
     pub fn play(&mut self) {
         let mut counter = 0_u32;
         loop {
-            let moment: Moment = match self.generator.next() {
+            let moment: Moment = match (*self.generator).next() {
                 None => return,
                 Some(m) => m,
             };
@@ -40,7 +40,7 @@ where
                     match event {
                         Event::Tempo(val) => self.timer.change_tempo(*val),
                         Event::Midi(msg) => {
-                            if !play(self.con, *msg) {
+                            if !play(&mut self.con, *msg) {
                                 panic!()
                             }
                             todo!()
@@ -55,7 +55,7 @@ where
     }
 }
 
-fn play(mut con: midir::MidiOutputConnection, msg: nodi::MidiEvent) -> bool {
+fn play(con: &mut midir::MidiOutputConnection, msg: nodi::MidiEvent) -> bool {
     let mut buf = Vec::with_capacity(8);
     let _ = msg.write(&mut buf);
 

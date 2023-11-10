@@ -1,5 +1,3 @@
-use rodio::source::{SineWave, TakeDuration};
-
 use super::tone;
 use super::*;
 
@@ -60,30 +58,12 @@ impl Chord {
         }
     }
 
-    pub fn as_sine_wave(&self, duration: f32, o: i32) -> tone::ChordSource<TakeDuration<SineWave>> {
-        tone::chord(
-            self.as_5_freq()
-                .iter()
-                .map(|f| return tone::sine_wave_octave(*f, duration, o))
-                .collect(),
-        )
-    }
-
-    pub fn as_freq(&self) -> Vec<f32> {
+    pub fn as_midi_notes(&self) -> Vec<f32> {
         self.steps
             .iter()
-            .map(|s| step_as_freq(s, self.key_freq))
+            .map(|s| step_as_chromatic(s) + key_note)
             .collect()
     }
 
-    pub fn as_5_freq(&self) -> Vec<f32> {
-        [0. as f32; 5]
-            .iter()
-            .enumerate()
-            .map(|(index, _)| match self.steps.iter().next() {
-                Some(s) => step_as_freq(s, self.key_freq),
-                None => 0.0,
-            })
-            .collect::<Vec<f32>>()
     }
 }
