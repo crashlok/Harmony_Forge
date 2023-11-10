@@ -41,12 +41,16 @@ impl Step {
             _ => panic!("dont now what {:?} is", step),
         }
     }
+}
 
-    pub fn step_as_freq(step: &Step, key_freq: f32) -> f32 {
-        chromatic_step_as_freq(step_to_chromatic(step), key_freq)
-    }
+pub fn step_as_freq(step: &Step, key_note: f32) -> f32 {
+    chromatic_step_as_freq(step_to_chromatic(step), key_note)
+}
 
-    fn chromatic_step_as_freq(cstep: usize, key_freq: f32) -> f32 {
-        (2.0 as f32).powf(cstep as f32 / 12.0) * key_freq
-    }
+fn chromatic_step_as_freq(cstep: usize, key_note: f32) -> f32 {
+    (2.0 as f32).powf(cstep as f32 / 12.0) * key_note
+}
+
+pub fn octave(n: i32, o: i32) -> i32 {
+    n * 2.0.powf(o)
 }

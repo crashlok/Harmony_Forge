@@ -1,7 +1,7 @@
 use super::{Scale, Step};
 
 impl Scale {
-    pub fn new_major(key_freq: f32) -> Scale {
+    pub fn new_major(key_note: f32) -> Scale {
         Scale {
             key_note,
             steps: vec![
@@ -17,7 +17,7 @@ impl Scale {
         }
     }
 
-    pub fn new_minor(key_freq: f32) -> Scale {
+    pub fn new_minor(key_note: f32) -> Scale {
         Scale {
             key_note,
             steps: vec![

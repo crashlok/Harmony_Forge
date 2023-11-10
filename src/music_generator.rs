@@ -70,3 +70,7 @@ pub trait MelodyGen {
 pub trait ChordGen {
     fn gen(&mut self) -> &[Event];
 }
+
+fn midi_massage_event(message: midly::MidiMessage, channel: midly::num::u4) {
+    nodi::Event::Midi(nodi::MidiEvent { channel, message })
+}
