@@ -52,11 +52,11 @@ where
         let mut result: Moment = Moment { events: Vec::new() };
 
         for message in self.chord_gen.gen() {
-            result.push(*message)
+            result.push(message)
         }
 
         for message in self.melody_gen.gen() {
-            result.push(*message)
+            result.push(message)
         }
 
         Some(result)
@@ -64,13 +64,13 @@ where
 }
 
 pub trait MelodyGen {
-    fn gen(&mut self) -> &[Event];
+    fn gen(&mut self) -> Vec<Event>;
 }
 
 pub trait ChordGen {
-    fn gen(&mut self) -> &[Event];
+    fn gen(&mut self) -> Vec<Event>;
 }
 
-fn midi_massage_event(message: midly::MidiMessage, channel: midly::num::u4) {
+fn midi_massage_event(message: midly::MidiMessage, channel: midly::num::u4) -> nodi::Event {
     nodi::Event::Midi(nodi::MidiEvent { channel, message })
 }

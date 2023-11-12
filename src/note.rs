@@ -14,17 +14,17 @@ pub struct Scale {
 }
 
 impl Scale {
-    pub fn as_midi_notes(&self) -> Vec<f32> {
+    pub fn as_midi_notes(&self) -> Vec<i32> {
         self.steps
             .iter()
-            .map(|s| s.as_chromatic() + key_note)
+            .map(|s| s.as_chromatic() + self.key_note)
             .collect()
     }
 }
 
 impl Step {
-    fn as_chromatic(step: &Step) -> usize {
-        match step {
+    pub fn as_chromatic(&self) -> i32 {
+        match self {
             Step::Normal(1) => 1,
             Step::Minor(2) => 2,
             Step::Major(2) => 3,
@@ -38,19 +38,19 @@ impl Step {
             Step::Minor(7) => 11,
             Step::Major(7) => 12,
             Step::Normal(8) => 13,
-            _ => panic!("dont now what {:?} is", step),
+            _ => panic!("dont now what {:?} is", self),
         }
     }
 }
 
 pub fn step_as_freq(step: &Step, key_note: f32) -> f32 {
-    chromatic_step_as_freq(step_to_chromatic(step), key_note)
+    chromatic_step_as_freq(step.as_chromatic(), key_note)
 }
 
-fn chromatic_step_as_freq(cstep: usize, key_note: f32) -> f32 {
+fn chromatic_step_as_freq(cstep: i32, key_note: f32) -> f32 {
     (2.0 as f32).powf(cstep as f32 / 12.0) * key_note
 }
 
 pub fn octave(n: i32, o: i32) -> i32 {
-    n * 2.0.powf(o)
+    n + (12 * o)
 }
