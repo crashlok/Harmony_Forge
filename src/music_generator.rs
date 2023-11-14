@@ -32,12 +32,16 @@ where
         }
     }
 
-    pub fn play(mut self, t: Ticker, con: MidiOutputConnection) -> mpsc::Sender<()> {
+    pub fn play(
+        mut self,
+        t: Ticker,
+        con: MidiOutputConnection,
+    ) -> (mpsc::Sender<()>, thread::JoinHandle<()>) {
         let (tx, rx) = mpsc::channel();
         self.rx = Some(rx);
         let mut midi_player = MidiPlayer::new(self, con, t);
-        thread::spawn(move || midi_player.play());
-        tx
+        let handle = thread::spawn(move || midi_player.play());
+        (tx, handle)
     }
 }
 

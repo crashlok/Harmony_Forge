@@ -33,18 +33,18 @@ impl MelodyGen for Random {
                     key: n,
                     vel: u7::new(1),
                 },
-                u4::new(1),
+                u4::new(3),
             )];
         } else if rand::random() {
             let n = self.playing[0];
             self.playing.pop();
-            return vec![midi_massage_event(
-                midly::MidiMessage::NoteOff {
-                    key: n,
-                    vel: u7::new(1),
-                },
-                u4::new(1),
-            )];
+            //return vec![midi_massage_event(
+            //    midly::MidiMessage::NoteOff {
+            //        key: n,
+            //        vel: u7::new(1),
+            //    },
+            //    u4::new(1),
+            //)];
         }
         Vec::new()
     }

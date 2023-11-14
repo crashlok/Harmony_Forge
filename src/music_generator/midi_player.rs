@@ -43,7 +43,6 @@ where
                             if !play(&mut self.con, *msg) {
                                 panic!()
                             }
-                            todo!()
                         }
                         _ => (),
                     };
