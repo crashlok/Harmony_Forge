@@ -62,7 +62,6 @@ where
         for message in self.melody_gen.gen() {
             result.push(message)
         }
-
         Some(result)
     }
 }

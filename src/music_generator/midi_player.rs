@@ -55,6 +55,7 @@ where
 }
 
 fn play(con: &mut midir::MidiOutputConnection, msg: nodi::MidiEvent) -> bool {
+    dbg!(msg);
     let mut buf = Vec::with_capacity(8);
     let _ = msg.write(&mut buf);
 
