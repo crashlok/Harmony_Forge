@@ -1,6 +1,7 @@
 use super::{midi_massage_event, MelodyGen};
 use crate::note::{octave, Scale};
 use midly::num::{u4, u7};
+use rand::distributions::{self, Distribution};
 use std::ops::Range;
 
 pub struct Random {
@@ -21,6 +22,16 @@ impl Random {
             scale: scale_resut,
         }
     }
+
+    pub fn gen_note(&mut self) -> u7 {
+        dbg!(&self.scale);
+        let dist = distributions::Uniform::<usize>::new(0, self.scale.len());
+        u7::new(
+            self.scale[dist.sample(&mut rand::thread_rng())]
+                .try_into()
+                .unwrap(),
+        )
+    }
 }
 
 impl MelodyGen for Random {
@@ -28,7 +39,7 @@ impl MelodyGen for Random {
         self.playing = self.playing.iter().map(|(n, c)| (*n, c + 1)).collect();
 
         if self.playing.is_empty() {
-            let n: u7 = u7::new(60);
+            let n: u7 = self.gen_note();
             self.playing.push((n, 0));
             return vec![midi_massage_event(
                 midly::MidiMessage::NoteOn {

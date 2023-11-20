@@ -21,7 +21,7 @@ fn main() {
     let port: &MidiOutputPort = &out.ports()[1];
     let con = out.connect(port, "1").expect("very bad");
 
-    let m_gen = MusicGenerator::new(Test {}, Random::new(Scale::new_major(60), 0..0));
+    let m_gen = MusicGenerator::new(Test {}, Random::new(Scale::new_major(60), 0..1));
 
     let (_tx, handle): (mpsc::Sender<()>, thread::JoinHandle<()>) = m_gen.play(
         Ticker::with_initial_tempo(
