@@ -1,5 +1,9 @@
 use harmony_forge::{
-    music_generator::{chord_generators::Test, melody_generators::Random, MusicGenerator},
+    music_generator::{
+        note_generator::{self, RandomNotes},
+        pattern_generators::{self, OnBeatPattern},
+        MusicGenerator, NoteGenerator, PatternGenerator,
+    },
     note::Scale,
 };
 use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
@@ -21,7 +25,10 @@ fn main() {
     let port: &MidiOutputPort = &out.ports()[1];
     let con = out.connect(port, "1").expect("very bad");
 
-    let m_gen = MusicGenerator::new(Test {}, Random::new(Scale::new_major(60), 0..1));
+    let m_gen = MusicGenerator::new(
+        EmptyPattern,
+        OnBeatPattern::new(RandomNotes::new(Scale::new_major(60), 0..1)),
+    );
 
     let (_tx, handle): (mpsc::Sender<()>, thread::JoinHandle<()>) = m_gen.play(
         Ticker::with_initial_tempo(
