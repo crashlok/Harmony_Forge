@@ -1,18 +1,18 @@
+use midi_player::MidiPlayer;
 use midir::MidiOutputConnection;
+use midly::num::u7;
 use nodi::{timers::Ticker, Event, Moment};
 use std::{sync::mpsc, thread};
 
-use midi_player::MidiPlayer;
-
-pub mod chord_generators;
-pub mod melody_generators;
 mod midi_player;
+pub mod note_generator;
+pub mod pattern_generators;
 
 //#[derive(Debug)]
 pub struct MusicGenerator<C, M>
 where
-    C: ChordGen + Send + 'static,
-    M: MelodyGen + Send + 'static,
+    C: PatternGenerator<dyn NoteGenerator> + Send + 'static,
+    M: PatternGenerator<dyn NoteGenerator> + Send + 'static,
 {
     rx: Option<mpsc::Receiver<()>>,
     melody_gen: M,
@@ -21,8 +21,8 @@ where
 
 impl<C, M> MusicGenerator<C, M>
 where
-    C: ChordGen + Send + 'static,
-    M: MelodyGen + Send + 'static,
+    C: PatternGenerator<dyn NoteGenerator> + Send + 'static,
+    M: PatternGenerator<dyn NoteGenerator> + Send + 'static,
 {
     pub fn new(chord_gen: C, melody_gen: M) -> Self {
         MusicGenerator {
@@ -47,31 +47,30 @@ where
 
 impl<C, M> Iterator for MusicGenerator<C, M>
 where
-    C: ChordGen + Send + 'static,
-    M: MelodyGen + Send + 'static,
+    C: PatternGenerator<dyn NoteGenerator> + Send + 'static,
+    M: PatternGenerator<dyn NoteGenerator> + Send + 'static,
 {
     type Item = nodi::Moment;
 
     fn next(&mut self) -> Option<Self::Item> {
         let mut result: Moment = Moment { events: Vec::new() };
 
-        for message in self.chord_gen.gen() {
+        for message in self.melody_gen.gen() {
             result.push(message)
         }
-
-        for message in self.melody_gen.gen() {
+        for message in self.chord_gen.gen() {
             result.push(message)
         }
         Some(result)
     }
 }
 
-pub trait MelodyGen {
+pub trait PatternGenerator<N: NoteGenerator + ?Sized> {
     fn gen(&mut self) -> Vec<Event>;
 }
 
-pub trait ChordGen {
-    fn gen(&mut self) -> Vec<Event>;
+pub trait NoteGenerator {
+    fn gen(&mut self) -> Vec<u7>;
 }
 
 fn midi_massage_event(message: midly::MidiMessage, channel: midly::num::u4) -> nodi::Event {
