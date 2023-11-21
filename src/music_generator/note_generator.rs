@@ -1,7 +1,7 @@
 use super::NoteGenerator;
 use crate::note::{octave, Scale};
 use midly::num::u7;
-use rand::distributions;
+use rand::distributions::{self, Distribution};
 use std::ops::Range;
 
 pub struct RandomNotes {
@@ -15,16 +15,18 @@ impl RandomNotes {
         for o in octave_range {
             scale_resut.append(&mut scale.iter().map(|n| octave(*n, o)).collect::<Vec<i32>>())
         }
+
+        Self { scale: scale_resut }
     }
 }
 impl NoteGenerator for RandomNotes {
-    fn gen(&mut self) -> u7 {
+    fn gen(&mut self) -> Vec<u7> {
         dbg!(&self.scale);
         let dist = distributions::Uniform::<usize>::new(0, self.scale.len());
-        u7::new(
+        vec![u7::new(
             self.scale[dist.sample(&mut rand::thread_rng())]
                 .try_into()
                 .unwrap(),
-        )
+        )]
     }
 }

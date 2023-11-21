@@ -9,12 +9,12 @@ impl<T: NoteGenerator> PatternGenerator<T> for EmptyPattern {
     }
 }
 
-pub struct OnBeatPattern<N: NoteGenerator> {
+pub struct OnBeatPattern<N: NoteGenerator + 'static> {
     playing: Vec<(u7, u32)>,
     note_generator: N,
 }
 
-impl<N: NoteGenerator> OnBeatPattern<N> {
+impl<N: NoteGenerator + 'static> OnBeatPattern<N> {
     pub fn new(note_generator: N) -> Self {
         Self {
             playing: Vec::new(),
@@ -23,7 +23,7 @@ impl<N: NoteGenerator> OnBeatPattern<N> {
     }
 }
 
-impl<N: NoteGenerator> PatternGenerator<N> for OnBeatPattern<N> {
+impl<N: NoteGenerator + 'static> PatternGenerator<N> for OnBeatPattern<N> {
     fn gen(&mut self) -> Vec<nodi::Event> {
         self.playing = self.playing.iter().map(|(n, c)| (*n, c + 1)).collect();
 
