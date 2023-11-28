@@ -5,6 +5,7 @@ use harmony_forge::{
         MusicGenerator,
     },
     note::Scale,
+    probability_density_function,
 };
 use midir::{MidiOutput, MidiOutputPort};
 use nodi::timers::Ticker;
@@ -35,4 +36,15 @@ fn main() {
     );
 
     handle.join().expect("music generator paniced")
+}
+
+fn probability_test() {
+    for i in 0..100 {
+        let n = f64::floor(probability_density_function(i as f64, 50.0, 3.5) * 12.0_f64.powf(2.0));
+        print!(" {} {} ", i, n);
+        for _ in 0..(n) as i32 {
+            print!("#")
+        }
+        println!("");
+    }
 }

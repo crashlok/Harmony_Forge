@@ -17,21 +17,27 @@ impl NearNotes {
         }
     }
 
-    fn gen_dist(&self){
-
+    fn gen_dist(&self) -> Vec<f64> {
+        let mut result = Vec::new();
+        for x in 0..self.scale.len() {
+            result.push(f64::floor(
+                crate::probability_density_function(x as f64, self.scale.len() as f64 / 2.0, 3.5)
+                    * 12.0_f64.powf(2.0),
+            ))
+        }
+        result
     }
 }
 
 impl NoteGenerator for NearNotes {
     fn gen(&mut self) -> Vec<u7> {
-        let dist = distributions::Uniform::<usize>::new(0, self.scale.len());
+        let dist = distributions::WeightedIndex::new(0, self.scale.);
 
         vec![u7::new(
             self.scale[dist.sample(&mut rand::thread_rng())]
                 .try_into()
                 .unwrap(),
         )]
-    }
     }
 }
 
@@ -57,7 +63,3 @@ impl NoteGenerator for RandomNotes {
         )]
     }
 }
-
-
-
-
