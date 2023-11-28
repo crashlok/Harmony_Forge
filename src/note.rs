@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 pub mod chords;
 mod scales;
 
@@ -19,6 +21,20 @@ impl Scale {
             .iter()
             .map(|s| s.as_chromatic() + self.key_note)
             .collect()
+    }
+    pub fn as_midi_notes_with_octave_range(&self, octave_range: Range<i32>) -> Vec<i32> {
+        let mut result: Vec<i32> = vec![];
+        let midi_scale: Vec<i32> = self.as_midi_notes();
+        for o in octave_range {
+            result.append(
+                &mut midi_scale
+                    .iter()
+                    .map(|n| octave(*n, o))
+                    .collect::<Vec<i32>>(),
+            )
+        }
+
+        result
     }
 }
 

@@ -11,8 +11,8 @@ pub mod pattern_generators;
 //#[derive(Debug)]
 pub struct MusicGenerator<C, M>
 where
-    C: PatternGenerator<dyn NoteGenerator> + Send + 'static,
-    M: PatternGenerator<dyn NoteGenerator> + Send + 'static,
+    C: PatternGenerator + Send + 'static,
+    M: PatternGenerator + Send + 'static,
 {
     rx: Option<mpsc::Receiver<()>>,
     melody_gen: M,
@@ -21,8 +21,8 @@ where
 
 impl<C, M> MusicGenerator<C, M>
 where
-    C: PatternGenerator<dyn NoteGenerator> + Send + 'static,
-    M: PatternGenerator<dyn NoteGenerator> + Send + 'static,
+    C: PatternGenerator + Send + 'static,
+    M: PatternGenerator + Send + 'static,
 {
     pub fn new(chord_gen: C, melody_gen: M) -> Self {
         MusicGenerator {
@@ -47,8 +47,8 @@ where
 
 impl<C, M> Iterator for MusicGenerator<C, M>
 where
-    C: PatternGenerator<dyn NoteGenerator> + Send + 'static,
-    M: PatternGenerator<dyn NoteGenerator> + Send + 'static,
+    C: PatternGenerator + Send + 'static,
+    M: PatternGenerator + Send + 'static,
 {
     type Item = nodi::Moment;
 
@@ -65,7 +65,7 @@ where
     }
 }
 
-pub trait PatternGenerator<N: NoteGenerator + ?Sized> {
+pub trait PatternGenerator {
     fn gen(&mut self) -> Vec<Event>;
 }
 

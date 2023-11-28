@@ -1,23 +1,16 @@
 use harmony_forge::{
     music_generator::{
-        note_generator::{self, RandomNotes},
-        pattern_generators::{self, OnBeatPattern},
-        MusicGenerator, NoteGenerator, PatternGenerator,
+        note_generator::RandomNotes,
+        pattern_generators::{EmptyPattern, OnBeatPattern},
+        MusicGenerator,
     },
     note::Scale,
 };
-use midir::{MidiOutput, MidiOutputConnection, MidiOutputPort};
-use midly::{Format, Smf};
-use nodi::{timers::Ticker, Connection, Player, Sheet};
-use std::{error::Error, fs, sync::mpsc, thread, time::Duration};
-
-const A: f32 = 440.0;
+use midir::{MidiOutput, MidiOutputPort};
+use nodi::timers::Ticker;
+use std::{sync::mpsc, thread, time::Duration};
 
 fn main() {
-    let m = fs::read("./src/Queen_-_Bohemian_Rhapsody.mid").unwrap();
-    let Smf { header, tracks } = Smf::parse(&m).unwrap();
-    //println!("{:#?}", tracks[1]);
-
     let out: MidiOutput = midir::MidiOutput::new("harmony_forge").expect("very bad");
     for i in &out.ports() {
         dbg!(out.port_name(i).as_deref().unwrap_or("<no device name>"));
