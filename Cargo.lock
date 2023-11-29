@@ -124,6 +124,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a26ae43d7bcc3b814de94796a5e736d4029efb0ee900c12e2d54c993ad1a1e07"
 
 [[package]]
+name = "find_all"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a3b40b97938cd51e8e285e12019dcd28b7e71d7398b6074d92308cebc03888f"
+
+[[package]]
 name = "getrandom"
 version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -138,6 +144,7 @@ dependencies = [
 name = "harmony_forge"
 version = "0.1.0"
 dependencies = [
+ "find_all",
  "midir",
  "midly",
  "nodi",

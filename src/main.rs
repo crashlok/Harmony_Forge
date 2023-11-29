@@ -1,6 +1,6 @@
 use harmony_forge::{
     music_generator::{
-        note_generator::RandomNotes,
+        note_generator::{NearNotes, RandomNotes},
         pattern_generators::{EmptyPattern, OnBeatPattern},
         MusicGenerator,
     },
@@ -21,7 +21,7 @@ fn main() {
 
     let m_gen = MusicGenerator::new(
         EmptyPattern,
-        OnBeatPattern::new(RandomNotes::new(Scale::new_major(60), 0..1)),
+        OnBeatPattern::new(NearNotes::new(Scale::new_major(60), 0..2)),
     );
 
     let (_tx, handle): (mpsc::Sender<()>, thread::JoinHandle<()>) = m_gen.play(

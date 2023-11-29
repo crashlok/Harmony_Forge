@@ -36,8 +36,7 @@ impl<N: NoteGenerator> PatternGenerator for OnBeatPattern<N> {
                 },
                 u4::new(0),
             )];
-        } else if self.playing[0].1 >= 10000 {
-            println!("{}", self.playing[0].1);
+        } else if self.playing[0].1 >= 2500 {
             let n = self.playing[0].0;
             self.playing.pop();
             return vec![midi_massage_event(
