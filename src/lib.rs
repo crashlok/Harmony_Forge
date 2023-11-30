@@ -2,6 +2,7 @@ use std::f64::consts;
 
 pub mod music_generator;
 pub mod note;
+pub mod timers;
 
 pub fn probability_density_function(x: f64, mu: f64, sigma: f64) -> f64 {
     (1.0 / (sigma * (2.0 * consts::PI).sqrt()))
