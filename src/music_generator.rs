@@ -34,7 +34,7 @@ where
 
     pub fn play(
         mut self,
-        t: Ticker,
+        t: crate::timers::TickerWithTime,
         con: MidiOutputConnection,
     ) -> (mpsc::Sender<()>, thread::JoinHandle<()>) {
         let (tx, rx) = mpsc::channel();

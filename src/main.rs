@@ -6,12 +6,19 @@ use harmony_forge::{
     },
     note::Scale,
     probability_density_function,
+    timers::TickerWithTime,
 };
 use midir::{MidiOutput, MidiOutputPort};
-use nodi::timers::Ticker;
+use nodi::{timers::Ticker, Timer};
 use std::{sync::mpsc, thread, time::Duration};
 
 fn main() {
+    let mut ticker = TickerWithTime::with_initial_tempo(100, 60).set_time_signature(4);
+    loop {
+        ticker.sleep(1);
+        dbg!(ticker.get_time());
+    }
+
     let out: MidiOutput = midir::MidiOutput::new("harmony_forge").expect("very bad");
     for i in &out.ports() {
         dbg!(out.port_name(i).as_deref().unwrap_or("<no device name>"));

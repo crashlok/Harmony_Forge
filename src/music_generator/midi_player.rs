@@ -1,23 +1,23 @@
 use midir::MidiOutputConnection;
 use nodi::{Event, Moment, Timer};
 
+use crate::timers::TickerWithTime;
+
 #[derive()]
-pub struct MidiPlayer<T, I>
+pub struct MidiPlayer<I>
 where
-    T: Timer,
     I: Iterator<Item = Moment>,
 {
     generator: Box<I>,
     pub con: MidiOutputConnection,
-    timer: T,
+    timer: TickerWithTime,
 }
 
-impl<I, T> MidiPlayer<T, I>
+impl<I> MidiPlayer<I>
 where
-    T: Timer,
     I: Iterator<Item = Moment>,
 {
-    pub fn new(generator: I, con: MidiOutputConnection, timer: T) -> Self {
+    pub fn new(generator: I, con: MidiOutputConnection, timer: TickerWithTime) -> Self {
         MidiPlayer {
             generator: Box::new(generator),
             con,
