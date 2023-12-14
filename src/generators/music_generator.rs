@@ -1,5 +1,5 @@
 use super::{GenModels, Generator};
-use crate::midi_player::MidiPlayer;
+use crate::player::Player;
 use midir::MidiOutputConnection;
 use nodi::{Event, Moment};
 use std::{sync::mpsc, thread};
@@ -33,8 +33,8 @@ where
     ) -> (mpsc::Sender<()>, thread::JoinHandle<()>) {
         let (tx, rx) = mpsc::channel();
         self.rx = Some(rx);
-        let mut midi_player = MidiPlayer::new(self, con, t);
-        let handle = thread::spawn(move || midi_player.play());
+        let mut player = Player::new(self, con, t);
+        let handle = thread::spawn(move || player.play());
         (tx, handle)
     }
 }

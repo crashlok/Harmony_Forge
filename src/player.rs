@@ -4,7 +4,7 @@ use nodi::{Event, Moment, Timer};
 use crate::{generators::Generator, timers::TickerWithTime};
 
 #[derive()]
-pub struct MidiPlayer<I>
+pub struct Player<I>
 where
     I: Generator<Item = Moment>,
 {
@@ -13,12 +13,12 @@ where
     timer: TickerWithTime,
 }
 
-impl<I> MidiPlayer<I>
+impl<I> Player<I>
 where
     I: Generator<Item = Moment>,
 {
     pub fn new(generator: I, con: MidiOutputConnection, timer: TickerWithTime) -> Self {
-        MidiPlayer {
+        Player {
             generator: Box::new(generator),
             con,
             timer,
