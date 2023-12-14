@@ -1,20 +1,22 @@
-use super::{midi_massage_event, NoteGenerator, PatternGenerator};
+use super::{midi_massage_event, GenModels, Generator};
 use midly::num::{u4, u7};
+use nodi::Event;
 
 pub struct EmptyPattern;
 
-impl PatternGenerator for EmptyPattern {
-    fn gen(&mut self) -> Vec<nodi::Event> {
+impl Generator for EmptyPattern {
+    type Item = Vec<Event>;
+    fn gen(&mut self, _gen_models: GenModels) -> Self::Item {
         Vec::new()
     }
 }
 
-pub struct OnBeatPattern<N: NoteGenerator> {
+pub struct OnBeatPattern<N: Generator<Item = Vec<u7>>> {
     playing: Vec<(u7, u32)>,
     note_generator: N,
 }
 
-impl<N: NoteGenerator + 'static> OnBeatPattern<N> {
+impl<N: Generator<Item = Vec<u7>>> OnBeatPattern<N> {
     pub fn new(note_generator: N) -> Self {
         Self {
             playing: Vec::new(),
@@ -22,12 +24,13 @@ impl<N: NoteGenerator + 'static> OnBeatPattern<N> {
         }
     }
 }
-impl<N: NoteGenerator> PatternGenerator for OnBeatPattern<N> {
-    fn gen(&mut self) -> Vec<nodi::Event> {
+impl<N: Generator<Item = Vec<u7>>> Generator for OnBeatPattern<N> {
+    type Item = Vec<Event>;
+    fn gen(&mut self, gen_models: GenModels) -> Self::Item {
         self.playing = self.playing.iter().map(|(n, c)| (*n, c + 1)).collect();
 
         if self.playing.is_empty() {
-            let n: u7 = self.note_generator.gen()[0];
+            let n: u7 = self.note_generator.gen(gen_models)[0];
             self.playing.push((n, 0));
             return vec![midi_massage_event(
                 midly::MidiMessage::NoteOn {

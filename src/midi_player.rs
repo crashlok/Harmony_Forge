@@ -1,12 +1,12 @@
 use midir::MidiOutputConnection;
 use nodi::{Event, Moment, Timer};
 
-use crate::timers::TickerWithTime;
+use crate::{generators::Generator, timers::TickerWithTime};
 
 #[derive()]
 pub struct MidiPlayer<I>
 where
-    I: Iterator<Item = Moment>,
+    I: Generator<Item = Moment>,
 {
     generator: Box<I>,
     pub con: MidiOutputConnection,
@@ -15,7 +15,7 @@ where
 
 impl<I> MidiPlayer<I>
 where
-    I: Iterator<Item = Moment>,
+    I: Generator<Item = Moment>,
 {
     pub fn new(generator: I, con: MidiOutputConnection, timer: TickerWithTime) -> Self {
         MidiPlayer {
@@ -28,10 +28,13 @@ where
     pub fn play(&mut self) {
         let mut counter = 0_u32;
         loop {
-            let moment: Moment = match (*self.generator).next() {
-                None => return,
-                Some(m) => m,
-            };
+            let moment: Moment = (*self.generator).gen(
+                (self
+                    .timer
+                    .get_time()
+                    .unwrap_or_else(|| panic!("didn't initialize tickers time signature"))),
+            );
+
             if !moment.is_empty() {
                 self.timer.sleep(counter);
                 counter = 0;

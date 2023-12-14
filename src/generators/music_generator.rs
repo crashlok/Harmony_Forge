@@ -1,18 +1,12 @@
-use midi_player::MidiPlayer;
+use super::{GenModels, Generator};
+use crate::midi_player::MidiPlayer;
 use midir::MidiOutputConnection;
-use midly::num::u7;
-use nodi::{timers::Ticker, Event, Moment};
+use nodi::{Event, Moment};
 use std::{sync::mpsc, thread};
-
-mod midi_player;
-pub mod note_generator;
-pub mod pattern_generators;
-
-//#[derive(Debug)]
 pub struct MusicGenerator<C, M>
 where
-    C: PatternGenerator + Send + 'static,
-    M: PatternGenerator + Send + 'static,
+    C: Generator<Item = Vec<Event>> + Send + 'static,
+    M: Generator<Item = Vec<Event>> + Send + 'static,
 {
     rx: Option<mpsc::Receiver<()>>,
     melody_gen: M,
@@ -21,8 +15,8 @@ where
 
 impl<C, M> MusicGenerator<C, M>
 where
-    C: PatternGenerator + Send + 'static,
-    M: PatternGenerator + Send + 'static,
+    C: Generator<Item = Vec<Event>> + Send + 'static,
+    M: Generator<Item = Vec<Event>> + Send + 'static,
 {
     pub fn new(chord_gen: C, melody_gen: M) -> Self {
         MusicGenerator {
@@ -45,34 +39,22 @@ where
     }
 }
 
-impl<C, M> Iterator for MusicGenerator<C, M>
+impl<C, M> Generator for MusicGenerator<C, M>
 where
-    C: PatternGenerator + Send + 'static,
-    M: PatternGenerator + Send + 'static,
+    C: Generator<Item = Vec<Event>> + Send + 'static,
+    M: Generator<Item = Vec<Event>> + Send + 'static,
 {
     type Item = nodi::Moment;
 
-    fn next(&mut self) -> Option<Self::Item> {
+    fn gen(&mut self, gen_models: GenModels) -> Self::Item {
         let mut result: Moment = Moment { events: Vec::new() };
 
-        for message in self.melody_gen.gen() {
+        for message in self.melody_gen.gen(gen_models) {
             result.push(message)
         }
-        for message in self.chord_gen.gen() {
+        for message in self.chord_gen.gen(gen_models) {
             result.push(message)
         }
-        Some(result)
+        result
     }
-}
-
-pub trait PatternGenerator {
-    fn gen(&mut self) -> Vec<Event>;
-}
-
-pub trait NoteGenerator {
-    fn gen(&mut self) -> Vec<u7>;
-}
-
-fn midi_massage_event(message: midly::MidiMessage, channel: midly::num::u4) -> nodi::Event {
-    nodi::Event::Midi(nodi::MidiEvent { channel, message })
 }
