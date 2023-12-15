@@ -46,7 +46,7 @@ where
 {
     type Item = nodi::Moment;
 
-    fn gen(&mut self, gen_models: GenModels) -> Self::Item {
+    fn gen(&mut self, gen_models: &mut GenModels) -> Self::Item {
         let mut result: Moment = Moment { events: Vec::new() };
 
         for message in self.melody_gen.gen(gen_models) {

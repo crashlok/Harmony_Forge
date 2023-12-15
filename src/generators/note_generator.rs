@@ -34,7 +34,7 @@ impl PatternNotes {
 impl Generator for PatternNotes {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, _gen_models: GenModels) -> Self::Item {
+    fn gen(&mut self, _gen_models: &mut GenModels) -> Self::Item {
         let raw_dist = self.gen_dist();
         display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
@@ -78,7 +78,7 @@ impl NearNotes {
 impl Generator for NearNotes {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, _gen_models: GenModels) -> Self::Item {
+    fn gen(&mut self, _gen_models: &mut GenModels) -> Self::Item {
         let raw_dist = self.gen_dist();
         display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
@@ -106,7 +106,7 @@ impl RandomNotes {
 impl Generator for RandomNotes {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, _gen_models: GenModels) -> Self::Item {
+    fn gen(&mut self, _gen_models: &mut GenModels) -> Self::Item {
         let dist = distributions::Uniform::<usize>::new(0, self.scale.len());
         vec![u7::new(
             self.scale[dist.sample(&mut rand::thread_rng())]

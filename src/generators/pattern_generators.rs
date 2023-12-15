@@ -6,7 +6,7 @@ pub struct EmptyPattern;
 
 impl Generator for EmptyPattern {
     type Item = Vec<Event>;
-    fn gen(&mut self, _gen_models: GenModels) -> Self::Item {
+    fn gen(&mut self, _gen_models: &mut GenModels) -> Self::Item {
         Vec::new()
     }
 }
@@ -26,7 +26,7 @@ impl<N: Generator<Item = Vec<u7>>> OnBeatPattern<N> {
 }
 impl<N: Generator<Item = Vec<u7>>> Generator for OnBeatPattern<N> {
     type Item = Vec<Event>;
-    fn gen(&mut self, gen_models: GenModels) -> Self::Item {
+    fn gen(&mut self, gen_models: &mut GenModels) -> Self::Item {
         self.playing = self.playing.iter().map(|(n, c)| (*n, c + 1)).collect();
 
         if self.playing.is_empty() {

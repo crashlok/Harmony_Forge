@@ -1,7 +1,7 @@
 use midir::MidiOutputConnection;
 use nodi::{Event, Moment, Timer};
 
-use crate::{generators::Generator, timers::TickerWithTime};
+use crate::{generators::Generator, models::notes_playing::NotesPlaying, timers::TickerWithTime};
 
 #[derive()]
 pub struct Player<I>
@@ -11,6 +11,7 @@ where
     generator: Box<I>,
     pub con: MidiOutputConnection,
     timer: TickerWithTime,
+    notes_playing: NotesPlaying,
 }
 
 impl<I> Player<I>
@@ -22,18 +23,19 @@ where
             generator: Box::new(generator),
             con,
             timer,
+            notes_playing: NotesPlaying::new(),
         }
     }
 
     pub fn play(&mut self) {
         let mut counter = 0_u32;
         loop {
-            let moment: Moment = (*self.generator).gen(
-                (self
-                    .timer
+            let moment: Moment = (*self.generator).gen(&mut (
+                self.timer
                     .get_time()
-                    .unwrap_or_else(|| panic!("didn't initialize tickers time signature"))),
-            );
+                    .expect("didn't initialize tickers time signature"),
+                &mut self.notes_playing,
+            ));
 
             if !moment.is_empty() {
                 self.timer.sleep(counter);
