@@ -6,12 +6,12 @@ use rand::distributions::{self, Distribution};
 use std::ops::Range;
 
 pub struct PatternNotes {
-    scale: Vec<i32>,
+    scale: Vec<u7>,
     lastnotes: Vec<usize>,
 }
 
 impl PatternNotes {
-    pub fn new(scale: Scale, octave_range: Range<i32>) -> Self {
+    pub fn new(scale: Scale, octave_range: Range<i8>) -> Self {
         Self {
             scale: scale.as_midi_notes_with_octave_range(octave_range),
             lastnotes: Vec::new(),
@@ -48,12 +48,12 @@ impl Generator for PatternNotes {
 }
 
 pub struct NearNotes {
-    scale: Vec<i32>,
+    scale: Vec<u7>,
     lastnotes: Vec<usize>,
 }
 
 impl NearNotes {
-    pub fn new(scale: Scale, octave_range: Range<i32>) -> Self {
+    pub fn new(scale: Scale, octave_range: Range<i8>) -> Self {
         Self {
             scale: scale.as_midi_notes_with_octave_range(octave_range),
             lastnotes: Vec::new(),
@@ -92,11 +92,11 @@ impl Generator for NearNotes {
 }
 
 pub struct RandomNotes {
-    scale: Vec<i32>,
+    scale: Vec<u7>,
 }
 
 impl RandomNotes {
-    pub fn new(scale: Scale, octave_range: Range<i32>) -> Self {
+    pub fn new(scale: Scale, octave_range: Range<i8>) -> Self {
         Self {
             scale: scale.as_midi_notes_with_octave_range(octave_range),
         }
@@ -113,5 +113,23 @@ impl Generator for RandomNotes {
                 .try_into()
                 .unwrap(),
         )]
+    }
+}
+
+pub struct NotesDependingBar {
+    notes: Vec<Vec<u7>>,
+}
+
+impl NotesDependingBar {
+    pub fn new(notes: Vec<Vec<u7>>) -> Self {
+        Self { notes }
+    }
+}
+
+impl Generator for NotesDependingBar {
+    type Item = Vec<u7>;
+
+    fn gen(&mut self, gen_models: &mut GenModels) -> Self::Item {
+        self.notes[(gen_models.0.get_bars() % self.notes.len() as i32) as usize].clone()
     }
 }

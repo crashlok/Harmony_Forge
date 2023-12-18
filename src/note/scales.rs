@@ -1,9 +1,10 @@
 use super::{Scale, Step};
+use midly::num::u7;
 
 impl Scale {
-    pub fn new_major(key_note: i32) -> Scale {
+    pub fn new_major(key_note: u8) -> Scale {
         Scale {
-            key_note,
+            key_note: u7::new(key_note),
             steps: vec![
                 Step::Normal(1),
                 Step::Major(2),
@@ -17,9 +18,9 @@ impl Scale {
         }
     }
 
-    pub fn new_minor(key_note: i32) -> Scale {
+    pub fn new_minor(key_note: u8) -> Scale {
         Scale {
-            key_note,
+            key_note: u7::new(key_note),
             steps: vec![
                 Step::Normal(1),
                 Step::Major(2),
