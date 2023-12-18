@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 use std::f64::consts;
 
 pub mod generators;

@@ -1,3 +1,5 @@
+#![deny(warnings)]
+
 use harmony_forge::{
     generators::{
         music_generator::MusicGenerator,
