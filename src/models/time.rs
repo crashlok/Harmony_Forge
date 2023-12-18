@@ -1,12 +1,54 @@
-use std::fmt;
+use std::{
+    cmp,
+    fmt::{self, Debug},
+    ops,
+};
 
+#[derive(Clone, Copy)]
 pub struct MusicTime {
     time_signature_quarters: Option<u16>,
     bars: i32,
     quarters: f64,
 }
 
-impl fmt::Debug for MusicTime {
+impl ops::Add for MusicTime {
+    type Output = Self;
+    fn add(self, rhs: Self) -> Self::Output {
+        let mut res = Self {
+            time_signature_quarters: self.get_time_signature_in_quarters(),
+            bars: self.get_bars() + rhs.get_bars(),
+            quarters: self.get_quarters_f64() + rhs.get_quarters_f64(),
+        };
+        res.update_bars();
+        res
+    }
+}
+impl ops::Sub for MusicTime {
+    type Output = Self;
+    fn sub(self, rhs: Self) -> Self::Output {
+        let mut res = Self {
+            time_signature_quarters: self.get_time_signature_in_quarters(),
+            bars: self.get_bars() - rhs.get_bars(),
+            quarters: self.get_quarters_f64() - rhs.get_quarters_f64(),
+        };
+        res.update_bars();
+        res
+    }
+}
+impl cmp::PartialEq for MusicTime {
+    fn eq(&self, other: &Self) -> bool {
+        self.get_full_quarters() == other.get_full_quarters()
+    }
+}
+
+impl cmp::PartialOrd for MusicTime {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        self.get_full_quarters()
+            .partial_cmp(&other.get_full_quarters())
+    }
+}
+
+impl Debug for MusicTime {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt.debug_struct("MusicTime")
             .field("Bars", &self.get_bars())
@@ -24,6 +66,15 @@ impl MusicTime {
             bars: 0,
             quarters: 0.0,
         }
+    }
+    pub fn from_quarters(quarters: f64) -> Self {
+        let mut res = Self {
+            time_signature_quarters: None,
+            bars: 0,
+            quarters,
+        };
+        res.update_bars();
+        res
     }
 
     pub fn set_time_signature(&mut self, time_signature_quarters: u16) -> &mut Self {
@@ -49,11 +100,28 @@ impl MusicTime {
         self.quarters * 2.0
     }
 
+    pub fn get_time_signature_in_quarters(&self) -> Option<u16> {
+        self.time_signature_quarters
+    }
+
+    pub fn get_time_signature_in_eights(&self) -> Option<u16> {
+        self.time_signature_quarters.map(|t| t * 2)
+    }
+
     pub fn get_eights_i32(&self) -> i32 {
         self.quarters.floor() as i32 * 2
     }
     pub fn get_quarters_f64(&self) -> f64 {
         self.quarters
+    }
+    pub fn get_full_quarters(&self) -> f64 {
+        if let Some(qbars) = self
+            .get_time_signature_in_quarters()
+            .map(|t| t as i32 * self.get_bars())
+        {
+            return self.get_quarters_f64() + qbars as f64;
+        }
+        self.get_quarters_f64()
     }
 
     pub fn get_quarters_i32(&self) -> i32 {
