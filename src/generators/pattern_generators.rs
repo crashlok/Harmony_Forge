@@ -1,12 +1,12 @@
-use super::{midi_massage_event, GenModels, Generator};
+use super::{midi_massage_event, Generator};
+use crate::models::Models;
 use midly::num::{u4, u7};
 use nodi::Event;
-
 pub struct EmptyPattern;
 
 impl Generator for EmptyPattern {
     type Item = Vec<Event>;
-    fn gen(&mut self, _gen_models: &mut GenModels) -> Self::Item {
+    fn gen(&mut self, _gen_models: &mut Models) -> Self::Item {
         Vec::new()
     }
 }
@@ -19,9 +19,9 @@ impl<N: Generator<Item = Vec<u7>>> OnBeatPattern<N> {
     pub fn new(note_generator: N) -> Self {
         Self { note_generator }
     }
-    fn stop_all(&self, gen_models: &mut GenModels) -> Vec<Event> {
+    fn stop_all(&self, gen_models: &mut Models) -> Vec<Event> {
         gen_models
-            .1
+            .playing
             .stop_all()
             .iter()
             .map(|n| {
@@ -38,13 +38,13 @@ impl<N: Generator<Item = Vec<u7>>> OnBeatPattern<N> {
 }
 impl<N: Generator<Item = Vec<u7>>> Generator for OnBeatPattern<N> {
     type Item = Vec<Event>;
-    fn gen(&mut self, gen_models: &mut GenModels) -> Self::Item {
-        let (time, playing) = gen_models;
+    fn gen(&mut self, gen_models: &mut Models) -> Self::Item {
         let mut res = Vec::new();
-        if time.get_rest_quarters() == 0.0 {
-            res.append(&mut self.stop_all(&mut (*time, *playing)));
-            let n: u7 = self.note_generator.gen(&mut (*time, *playing))[0];
-            playing.started(n, **time);
+        dbg!(gen_models.time);
+        if (gen_models.time.get_rest_quarters() * 100.0).floor() == 0.0 {
+            res.append(&mut self.stop_all(gen_models));
+            let n: u7 = self.note_generator.gen(gen_models)[0];
+            gen_models.playing.started(n, gen_models.time);
             res.push(midi_massage_event(
                 midly::MidiMessage::NoteOn {
                     key: n,

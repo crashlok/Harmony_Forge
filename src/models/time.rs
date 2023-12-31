@@ -132,3 +132,9 @@ impl MusicTime {
         self.quarters % 1.
     }
 }
+
+impl Default for MusicTime {
+    fn default() -> Self {
+        Self::new()
+    }
+}

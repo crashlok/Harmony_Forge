@@ -1,5 +1,5 @@
-use super::{GenModels, Generator};
-use crate::{display_distributtion, note::Scale};
+use super::Generator;
+use crate::{display_distributtion,models::Models, note::Scale};
 use find_all::FindAll;
 use midly::num::u7;
 use rand::distributions::{self, Distribution};
@@ -34,7 +34,7 @@ impl PatternNotes {
 impl Generator for PatternNotes {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, _gen_models: &mut GenModels) -> Self::Item {
+    fn gen(&mut self, _gen_models: &mut Models) -> Self::Item {
         let raw_dist = self.gen_dist();
         display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
@@ -78,7 +78,7 @@ impl NearNotes {
 impl Generator for NearNotes {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, _gen_models: &mut GenModels) -> Self::Item {
+    fn gen(&mut self, _gen_models: &mut Models) -> Self::Item {
         let raw_dist = self.gen_dist();
         display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
@@ -106,7 +106,7 @@ impl RandomNotes {
 impl Generator for RandomNotes {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, _gen_models: &mut GenModels) -> Self::Item {
+    fn gen(&mut self, _gen_models: &mut Models) -> Self::Item {
         let dist = distributions::Uniform::<usize>::new(0, self.scale.len());
         vec![u7::new(
             self.scale[dist.sample(&mut rand::thread_rng())]
@@ -129,7 +129,7 @@ impl NotesDependingBar {
 impl Generator for NotesDependingBar {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, gen_models: &mut GenModels) -> Self::Item {
-        self.notes[(gen_models.0.get_bars() % self.notes.len() as i32) as usize].clone()
+    fn gen(&mut self, gen_models: &mut Models) -> Self::Item {
+        self.notes[(gen_models.time.get_bars() % self.notes.len() as i32) as usize].clone()
     }
 }

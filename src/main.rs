@@ -10,8 +10,8 @@ use harmony_forge::{
     probability_density_function,
     timers::TickerWithTime,
 };
-
 use midir::{MidiOutput, MidiOutputPort};
+use nodi::{self, timers::Ticker};
 use std::{sync::mpsc, thread, time::Duration};
 
 fn main() {
@@ -19,23 +19,16 @@ fn main() {
     for i in &out.ports() {
         dbg!(out.port_name(i).as_deref().unwrap_or("<no device name>"));
     }
-    let port: &MidiOutputPort = &out.ports()[2];
+    let port: &MidiOutputPort = &out.ports()[0];
     let con = out.connect(port, "HarmonyForgeOut").expect("very bad");
-
-    let m_gen = MusicGenerator::new(
-        EmptyPattern,
-        OnBeatPattern::new(NotesDependingBar::new(vec![
+    let (_tx, handle): (mpsc::Sender<()>, thread::JoinHandle<()>) = MusicGenerator::new()
+        .add_generator(OnBeatPattern::new(NotesDependingBar::new(vec![
             Chord::new_major(60).as_midi_notes(),
             Chord::new_major(67).as_midi_notes(),
             Chord::new_major(65).as_midi_notes(),
             Chord::new_major(60).as_midi_notes(),
-        ])),
-    );
-
-    let (_tx, handle): (mpsc::Sender<()>, thread::JoinHandle<()>) = m_gen.play(
-        TickerWithTime::with_initial_tempo(100, 100).set_time_signature(4),
-        con,
-    );
+        ])))
+        .play(Ticker::with_initial_tempo(100, 700000), con, 3);
 
     handle.join().expect("music generator paniced")
 }

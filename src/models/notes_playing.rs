@@ -2,6 +2,7 @@ use midly::num::u7;
 
 use super::time::MusicTime;
 
+#[derive(Debug)]
 pub struct NotesPlaying(Vec<(u7, MusicTime)>);
 
 impl NotesPlaying {
