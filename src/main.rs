@@ -1,6 +1,7 @@
 #![deny(warnings)]
 #![allow(unused_imports)]
 use harmony_forge::{
+    bpm_to_micros_per_beat,
     generators::{
         music_generator::MusicGenerator,
         note_generator::{NearNotes, NotesDependingBar},
@@ -22,13 +23,20 @@ fn main() {
     let port: &MidiOutputPort = &out.ports()[0];
     let con = out.connect(port, "HarmonyForgeOut").expect("very bad");
     let (_tx, handle): (mpsc::Sender<()>, thread::JoinHandle<()>) = MusicGenerator::new()
-        .add_generator(OnBeatPattern::new(NotesDependingBar::new(vec![
-            Chord::new_major(60).as_midi_notes(),
-            Chord::new_major(67).as_midi_notes(),
-            Chord::new_major(65).as_midi_notes(),
-            Chord::new_major(60).as_midi_notes(),
-        ])))
-        .play(Ticker::with_initial_tempo(100, 700000), con, 3);
+        .add_generator(OnBeatPattern::new(
+            NotesDependingBar::new(vec![
+                Chord::new_major(60).as_midi_notes(),
+                Chord::new_major(67).as_midi_notes(),
+                Chord::new_major(65).as_midi_notes(),
+                Chord::new_major(60).as_midi_notes(),
+            ]),
+            0,
+        ))
+        .play(
+            Ticker::with_initial_tempo(100, bpm_to_micros_per_beat(120)),
+            con,
+            3,
+        );
 
     handle.join().expect("music generator paniced")
 }
