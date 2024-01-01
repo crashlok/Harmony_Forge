@@ -1,8 +1,8 @@
-use self::{notes_playing::NotesPlaying, time::MusicTime};
+use self::{notes_playing::NotesPlaying, time_models::MusicTime};
 
 pub mod notes_playing;
 pub mod parameter;
-pub mod time;
+pub mod time_models;
 
 #[derive(Debug)]
 pub struct Models {

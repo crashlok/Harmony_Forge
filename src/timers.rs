@@ -1,4 +1,4 @@
-use crate::models::time::MusicTime;
+use crate::models::time_models::MusicTime;
 use nodi::Timer;
 use std::time::Duration;
 pub struct TickerWithTime {
