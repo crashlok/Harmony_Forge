@@ -7,7 +7,7 @@ pub struct MusicGenerator<G>
 where
     G: Generator<Item = Vec<Event>> + Send + 'static,
 {
-    gen_models: Models,
+    models: Models,
     rx: Option<mpsc::Receiver<()>>,
     gen_list: Vec<Box<G>>,
 }
@@ -18,7 +18,7 @@ where
 {
     pub fn new() -> Self {
         MusicGenerator {
-            gen_models: Models::new(),
+            models: Models::new(),
             rx: None,
             gen_list: Vec::new(),
         }
@@ -35,7 +35,7 @@ where
         con: MidiOutputConnection,
         time_signature: u16,
     ) -> (mpsc::Sender<()>, thread::JoinHandle<()>) {
-        self.gen_models.time.set_time_signature(time_signature);
+        self.models.time.set_time_signature(time_signature);
         let (tx, rx) = mpsc::channel();
         self.rx = Some(rx);
         let mut player = Player::new(self, con, t);
@@ -51,14 +51,17 @@ where
     type Item = nodi::Moment;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.gen_models.time.add_ticks(1, 100);
-        let mut result: Moment = Moment { events: Vec::new() };
+        self.models.time.add_ticks(1, 100);
 
-        for generator in &mut self.gen_list {
-            for message in (**generator).gen(&mut self.gen_models) {
-                result.push(message)
-            }
-        }
-        Some(result)
+        let (result, new_models) = self.gen_list.iter_mut().fold(
+            (Vec::new(), self.models.clone()),
+            |(result, input_models), generator| {
+                let (mut events, end_models) = (**generator).gen(input_models);
+                events.append(&mut result.clone());
+                (events, end_models)
+            },
+        );
+        self.models = new_models;
+        Some(Moment { events: result })
     }
 }

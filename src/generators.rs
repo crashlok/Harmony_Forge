@@ -6,7 +6,7 @@ pub mod pattern_generators;
 
 pub trait Generator {
     type Item;
-    fn gen(&mut self, gen_models: &mut Models) -> Self::Item;
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models);
 }
 
 fn midi_massage_event(message: midly::MidiMessage, channel: midly::num::u4) -> nodi::Event {

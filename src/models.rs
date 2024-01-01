@@ -4,7 +4,7 @@ pub mod notes_playing;
 pub mod parameter;
 pub mod time_models;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Models {
     pub time: MusicTime,
     pub playing: NotesPlaying,

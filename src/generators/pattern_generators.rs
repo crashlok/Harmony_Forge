@@ -6,8 +6,8 @@ pub struct EmptyPattern;
 
 impl Generator for EmptyPattern {
     type Item = Vec<Event>;
-    fn gen(&mut self, _gen_models: &mut Models) -> Self::Item {
-        Vec::new()
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
+        (Vec::new(), gen_models)
     }
 }
 
@@ -22,21 +22,24 @@ impl<N: Generator<Item = Vec<u7>>> OnBeatPattern<N> {
 }
 impl<N: Generator<Item = Vec<u7>>> Generator for OnBeatPattern<N> {
     type Item = Vec<Event>;
-    fn gen(&mut self, gen_models: &mut Models) -> Self::Item {
-        let mut res = Vec::new();
-        dbg!(gen_models.time);
-        if (gen_models.time.get_rest_quarters() * 100.0).floor() == 0.0 {
+    fn gen(&mut self, input_models: Models) -> (Self::Item, Models) {
+        dbg!(input_models.time);
+        if (input_models.time.get_rest_quarters() * 100.0).floor() == 0.0 {
+            let mut gen_models: Models = input_models;
+            let mut res = Vec::new();
+
             res.append(&mut multiple_notes_off(
                 gen_models.playing.stop_all(),
                 u7::new(100),
                 u4::new(0),
             ));
-            res.append(&mut multiple_notes_on(
-                self.note_generator.gen(gen_models),
-                u7::new(100),
-                u4::new(0),
-            ))
+
+            let (new_notes, end_models) = self.note_generator.gen(gen_models);
+
+            res.append(&mut multiple_notes_on(new_notes, u7::new(100), u4::new(0)));
+
+            return (res, end_models);
         }
-        res
+        (Vec::new(), input_models)
     }
 }

@@ -1,5 +1,5 @@
 use super::Generator;
-use crate::{display_distributtion,models::Models, note::Scale};
+use crate::{display_distributtion, models::Models, note::Scale};
 use find_all::FindAll;
 use midly::num::u7;
 use rand::distributions::{self, Distribution};
@@ -34,7 +34,7 @@ impl PatternNotes {
 impl Generator for PatternNotes {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, _gen_models: &mut Models) -> Self::Item {
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
         let raw_dist = self.gen_dist();
         display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
@@ -43,7 +43,7 @@ impl Generator for PatternNotes {
 
         println!(" {} \n", n);
         self.lastnotes.push(n);
-        vec![u7::new(self.scale[n].try_into().unwrap())]
+        (vec![u7::new(self.scale[n].try_into().unwrap())], gen_models)
     }
 }
 
@@ -78,7 +78,7 @@ impl NearNotes {
 impl Generator for NearNotes {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, _gen_models: &mut Models) -> Self::Item {
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
         let raw_dist = self.gen_dist();
         display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
@@ -87,7 +87,7 @@ impl Generator for NearNotes {
 
         println!(" {} \n", n);
         self.lastnotes.push(n);
-        vec![u7::new(self.scale[n].try_into().unwrap())]
+        (vec![u7::new(self.scale[n].try_into().unwrap())], gen_models)
     }
 }
 
@@ -106,13 +106,16 @@ impl RandomNotes {
 impl Generator for RandomNotes {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, _gen_models: &mut Models) -> Self::Item {
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
         let dist = distributions::Uniform::<usize>::new(0, self.scale.len());
-        vec![u7::new(
-            self.scale[dist.sample(&mut rand::thread_rng())]
-                .try_into()
-                .unwrap(),
-        )]
+        (
+            vec![u7::new(
+                self.scale[dist.sample(&mut rand::thread_rng())]
+                    .try_into()
+                    .unwrap(),
+            )],
+            gen_models,
+        )
     }
 }
 
@@ -129,7 +132,10 @@ impl NotesDependingBar {
 impl Generator for NotesDependingBar {
     type Item = Vec<u7>;
 
-    fn gen(&mut self, gen_models: &mut Models) -> Self::Item {
-        self.notes[(gen_models.time.get_bars() % self.notes.len() as i32) as usize].clone()
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
+        (
+            self.notes[(gen_models.time.get_bars() % self.notes.len() as i32) as usize].clone(),
+            gen_models,
+        )
     }
 }
