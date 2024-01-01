@@ -13,16 +13,40 @@ fn midi_massage_event(message: midly::MidiMessage, channel: midly::num::u4) -> n
     nodi::Event::Midi(nodi::MidiEvent { channel, message })
 }
 
-fn multiple_massage(
+fn multiple_notes_on(
     notes: Vec<midly::num::u7>,
-    message: midly::MidiMessage,
+    velocity: midly::num::u7,
     channel: midly::num::u4,
 ) -> Vec<nodi::Event> {
-    let result: Vec<nodi::Event> = Vec::new();
-    for n in notes {
-        let spec_massage: midly::MidiMessage = message.clone();
-        spec_massage::key = n;
-        result.push(midi_massage_event(spec_massage, channel))
-    }
-    result
+    notes
+        .iter()
+        .map(|n| {
+            midi_massage_event(
+                midly::MidiMessage::NoteOn {
+                    key: *n,
+                    vel: velocity,
+                },
+                channel,
+            )
+        })
+        .collect()
+}
+
+fn multiple_notes_off(
+    notes: Vec<midly::num::u7>,
+    velocity: midly::num::u7,
+    channel: midly::num::u4,
+) -> Vec<nodi::Event> {
+    notes
+        .iter()
+        .map(|n| {
+            midi_massage_event(
+                midly::MidiMessage::NoteOff {
+                    key: *n,
+                    vel: velocity,
+                },
+                channel,
+            )
+        })
+        .collect()
 }
