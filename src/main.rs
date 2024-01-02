@@ -4,8 +4,8 @@ use harmony_forge::{
     bpm_to_micros_per_beat,
     generators::{
         music_generator::MusicGenerator,
-        note_generator::{NearNotes, NotesDependingBar},
-        pattern_generators::{EmptyPattern, OnBeatPattern},
+        note_generator::{NearNotes, NotesDependingBar, OneNote},
+        pattern_generators::{EmptyPattern, OnBeatPattern, OnClosurePattern},
     },
     note::{chords::Chord, Scale},
     probability_density_function,
@@ -22,20 +22,30 @@ fn main() {
     }
     let port: &MidiOutputPort = &out.ports()[0];
     let con = out.connect(port, "HarmonyForgeOut").expect("very bad");
+
     let (_tx, handle): (mpsc::Sender<()>, thread::JoinHandle<()>) = MusicGenerator::new()
-        .add_generator(OnBeatPattern::new(
+        .add_generator(Box::new(OnBeatPattern::new(
             NotesDependingBar::new(vec![
-                Chord::new_major(60).as_midi_notes(),
-                Chord::new_major(67).as_midi_notes(),
-                Chord::new_major(65).as_midi_notes(),
-                Chord::new_major(60).as_midi_notes(),
+                Chord::new_major(56).as_midi_notes(),
+                Chord::new_minor(53).as_midi_notes(),
+                Chord::new_minor(48).as_midi_notes(),
+                Chord::new_minor(48).as_midi_notes(),
             ]),
             0,
-        ))
+        )))
+        .add_generator(Box::new(OnClosurePattern::new(
+            |models| {
+                models.time.on_eight()
+                    && !models.time.on_quarter()
+                    && models.time.get_eights_i32() % 4 == 0
+            },
+            OneNote::new(vec![61]),
+            1,
+        )))
         .play(
             Ticker::with_initial_tempo(100, bpm_to_micros_per_beat(120)),
             con,
-            3,
+            4,
         );
 
     handle.join().expect("music generator paniced")

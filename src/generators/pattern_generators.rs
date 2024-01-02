@@ -27,8 +27,51 @@ impl<N: Generator<Item = Vec<u7>>> OnBeatPattern<N> {
 impl<N: Generator<Item = Vec<u7>>> Generator for OnBeatPattern<N> {
     type Item = Vec<Event>;
     fn gen(&mut self, input_models: Models) -> (Self::Item, Models) {
-        dbg!(&input_models.playing);
-        if (input_models.time.get_rest_quarters() * 100.0).floor() == 0.0 {
+        if input_models.time.on_quarter() {
+            let mut gen_models: Models = input_models.clone();
+            let mut res = Vec::new();
+
+            res.append(&mut multiple_notes_off(
+                gen_models.playing.stop_all(self.channel),
+                u7::new(100),
+                self.channel,
+            ));
+
+            let (new_notes, mut end_models) = self.note_generator.gen(gen_models);
+
+            res.append(&mut multiple_notes_on(
+                end_models
+                    .playing
+                    .start_multiple(new_notes, input_models.time, self.channel),
+                u7::new(100),
+                self.channel,
+            ));
+
+            return (res, end_models);
+        }
+        (Vec::new(), input_models)
+    }
+}
+
+pub struct OnClosurePattern<N: Generator<Item = Vec<u7>>, C: Fn(&Models) -> bool> {
+    note_generator: N,
+    channel: u4,
+    play_closure: C,
+}
+
+impl<N: Generator<Item = Vec<u7>>, C: Fn(&Models) -> bool> OnClosurePattern<N, C> {
+    pub fn new(play_closure: C, note_generator: N, channel: u8) -> Self {
+        Self {
+            note_generator,
+            channel: u4::new(channel),
+            play_closure,
+        }
+    }
+}
+impl<N: Generator<Item = Vec<u7>>, C: Fn(&Models) -> bool> Generator for OnClosurePattern<N, C> {
+    type Item = Vec<Event>;
+    fn gen(&mut self, input_models: Models) -> (Self::Item, Models) {
+        if (self.play_closure)(&input_models) {
             let mut gen_models: Models = input_models.clone();
             let mut res = Vec::new();
 

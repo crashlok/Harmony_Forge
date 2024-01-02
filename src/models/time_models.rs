@@ -55,6 +55,7 @@ impl Debug for MusicTime {
             .field("Quarters", &self.get_quarters_i32())
             .field("Eights", &self.get_eights_i32())
             .field("Rest(Quarters)", &self.get_rest_quarters())
+            .field("Rest(Eights)", &self.get_rest_eights())
             .finish()
     }
 }
@@ -124,12 +125,23 @@ impl MusicTime {
         self.get_quarters_f64()
     }
 
+    pub fn on_quarter(&self) -> bool {
+        (self.get_rest_quarters() * 100.0).floor() == 0.0
+    }
+
+    pub fn on_eight(&self) -> bool {
+        (self.get_rest_eights() * 100.0).floor() == 0.0
+    }
+
     pub fn get_quarters_i32(&self) -> i32 {
         self.quarters.floor() as i32
     }
 
     pub fn get_rest_quarters(&self) -> f64 {
         self.quarters % 1.
+    }
+    pub fn get_rest_eights(&self) -> f64 {
+        self.quarters % 0.5
     }
 }
 

@@ -139,3 +139,22 @@ impl Generator for NotesDependingBar {
         )
     }
 }
+
+pub struct OneNote {
+    note: Vec<u7>,
+}
+impl OneNote {
+    pub fn new(note: Vec<u8>) -> Self {
+        Self {
+            note: (note.iter().map(|n| u7::new(*n)).collect()),
+        }
+    }
+}
+
+impl Generator for OneNote {
+    type Item = Vec<u7>;
+
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
+        (self.note.clone(), gen_models)
+    }
+}

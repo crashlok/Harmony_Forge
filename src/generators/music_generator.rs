@@ -3,19 +3,16 @@ use crate::{models::Models, player::Player};
 use midir::MidiOutputConnection;
 use nodi::{timers::Ticker, Event, Moment};
 use std::{sync::mpsc, thread};
-pub struct MusicGenerator<G>
-where
-    G: Generator<Item = Vec<Event>> + Send + 'static,
-{
+
+type PatternGen = dyn Generator<Item = Vec<Event>> + Send;
+
+pub struct MusicGenerator {
     models: Models,
     rx: Option<mpsc::Receiver<()>>,
-    gen_list: Vec<Box<G>>,
+    gen_list: Vec<Box<PatternGen>>,
 }
 
-impl<G> MusicGenerator<G>
-where
-    G: Generator<Item = Vec<Event>> + Send + 'static,
-{
+impl MusicGenerator {
     pub fn new() -> Self {
         MusicGenerator {
             models: Models::new(),
@@ -24,8 +21,8 @@ where
         }
     }
 
-    pub fn add_generator(mut self, generator: G) -> Self {
-        self.gen_list.push(Box::new(generator));
+    pub fn add_generator(mut self, generator: Box<PatternGen>) -> Self {
+        self.gen_list.push(generator);
         self
     }
 
@@ -44,10 +41,7 @@ where
     }
 }
 
-impl<G> Iterator for MusicGenerator<G>
-where
-    G: Generator<Item = Vec<Event>> + Send + 'static,
-{
+impl Iterator for MusicGenerator {
     type Item = nodi::Moment;
 
     fn next(&mut self) -> Option<Self::Item> {
