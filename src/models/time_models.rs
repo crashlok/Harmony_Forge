@@ -124,7 +124,9 @@ impl MusicTime {
         }
         self.get_quarters_f64()
     }
-
+    pub fn on_bar(&self) -> bool {
+        self.on_quarter() && self.get_quarters_i32() == 0
+    }
     pub fn on_quarter(&self) -> bool {
         (self.get_rest_quarters() * 100.0).floor() == 0.0
     }

@@ -1,15 +1,13 @@
-use super::Generator;
+use super::Gen;
 use crate::{models::Models, player::Player};
 use midir::MidiOutputConnection;
 use nodi::{timers::Ticker, Event, Moment};
 use std::{sync::mpsc, thread};
 
-type PatternGen = dyn Generator<Item = Vec<Event>> + Send;
-
 pub struct MusicGenerator {
     models: Models,
     rx: Option<mpsc::Receiver<()>>,
-    gen_list: Vec<Box<PatternGen>>,
+    gen_list: Vec<Box<Gen<Vec<Event>>>>,
 }
 
 impl MusicGenerator {
@@ -21,7 +19,7 @@ impl MusicGenerator {
         }
     }
 
-    pub fn add_generator(mut self, generator: Box<PatternGen>) -> Self {
+    pub fn add_generator(mut self, generator: Box<Gen<Vec<Event>>>) -> Self {
         self.gen_list.push(generator);
         self
     }

@@ -11,8 +11,8 @@ pub enum Step {
 }
 #[derive(Clone, Debug)]
 pub struct Scale {
-    key_note: u7,
-    steps: Vec<Step>,
+    pub key_note: u7,
+    pub steps: Vec<Step>,
 }
 
 impl Scale {
