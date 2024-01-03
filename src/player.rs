@@ -1,24 +1,22 @@
 use midir::MidiOutputConnection;
-use nodi::{Event, Moment, Timer};
+use nodi::{timers::Ticker, Event, Moment, Timer};
 
 #[derive()]
-pub struct MidiPlayer<T, I>
+pub struct Player<I>
 where
-    T: Timer,
     I: Iterator<Item = Moment>,
 {
     generator: Box<I>,
     pub con: MidiOutputConnection,
-    timer: T,
+    timer: Ticker,
 }
 
-impl<I, T> MidiPlayer<T, I>
+impl<I> Player<I>
 where
-    T: Timer,
     I: Iterator<Item = Moment>,
 {
-    pub fn new(generator: I, con: MidiOutputConnection, timer: T) -> Self {
-        MidiPlayer {
+    pub fn new(generator: I, con: MidiOutputConnection, timer: Ticker) -> Self {
+        Player {
             generator: Box::new(generator),
             con,
             timer,
@@ -28,10 +26,7 @@ where
     pub fn play(&mut self) {
         let mut counter = 0_u32;
         loop {
-            let moment: Moment = match (*self.generator).next() {
-                None => return,
-                Some(m) => m,
-            };
+            let moment: Moment = (*self.generator).next().unwrap();
             if !moment.is_empty() {
                 self.timer.sleep(counter);
                 counter = 0;

@@ -17,6 +17,8 @@ jobs:
     - name: install alsa
       run: sudo apt install librust-alsa-sys-dev
       shell: bash
+    - name: Fix
+      run: cargo fix --verbose
     - name: Build
       run: cargo build --verbose
     - name: Run tests

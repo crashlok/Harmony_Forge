@@ -1,5 +1,5 @@
+use midly::num::u7;
 use std::ops::Range;
-
 pub mod chords;
 mod scales;
 
@@ -11,26 +11,26 @@ pub enum Step {
 }
 #[derive(Clone, Debug)]
 pub struct Scale {
-    key_note: i32,
-    steps: Vec<Step>,
+    pub key_note: u7,
+    pub steps: Vec<Step>,
 }
 
 impl Scale {
-    pub fn as_midi_notes(&self) -> Vec<i32> {
+    pub fn as_midi_notes(&self) -> Vec<u7> {
         self.steps
             .iter()
             .map(|s| s.as_chromatic() + self.key_note)
             .collect()
     }
-    pub fn as_midi_notes_with_octave_range(&self, octave_range: Range<i32>) -> Vec<i32> {
-        let mut result: Vec<i32> = vec![];
-        let midi_scale: Vec<i32> = self.as_midi_notes();
+    pub fn as_midi_notes_with_octave_range(&self, octave_range: Range<i8>) -> Vec<u7> {
+        let mut result: Vec<u7> = vec![];
+        let midi_scale: Vec<u7> = self.as_midi_notes();
         for o in octave_range {
             result.append(
                 &mut midi_scale
                     .iter()
                     .map(|n| octave(*n, o))
-                    .collect::<Vec<i32>>(),
+                    .collect::<Vec<u7>>(),
             )
         }
 
@@ -39,8 +39,8 @@ impl Scale {
 }
 
 impl Step {
-    pub fn as_chromatic(&self) -> i32 {
-        match self {
+    pub fn as_chromatic(&self) -> u7 {
+        u7::new(match self {
             Step::Normal(1) => 1,
             Step::Minor(2) => 2,
             Step::Major(2) => 3,
@@ -55,7 +55,7 @@ impl Step {
             Step::Major(7) => 12,
             Step::Normal(8) => 13,
             _ => panic!("dont now what {:?} is", self),
-        }
+        })
     }
 }
 
@@ -63,10 +63,10 @@ pub fn step_as_freq(step: &Step, key_note: f32) -> f32 {
     chromatic_step_as_freq(step.as_chromatic(), key_note)
 }
 
-fn chromatic_step_as_freq(cstep: i32, key_note: f32) -> f32 {
-    2.0_f32.powf(cstep as f32 / 12.0) * key_note
+fn chromatic_step_as_freq(cstep: u7, key_note: f32) -> f32 {
+    (2.0_f32).powf(cstep.as_int() as f32 / 12.0) * key_note
 }
 
-pub fn octave(n: i32, o: i32) -> i32 {
-    n + (12 * o)
+pub fn octave(n: u7, o: i8) -> u7 {
+    u7::new((n.as_int() as i8 + (12 * o)).try_into().unwrap_or(0))
 }

@@ -1,17 +1,17 @@
-use super::NoteGenerator;
-use crate::{display_distributtion, note::Scale};
+use super::Generator;
+use crate::{display_distributtion, models::Models, note::Scale};
 use find_all::FindAll;
 use midly::num::u7;
 use rand::distributions::{self, Distribution};
 use std::ops::Range;
 
 pub struct PatternNotes {
-    scale: Vec<i32>,
+    scale: Vec<u7>,
     lastnotes: Vec<usize>,
 }
 
 impl PatternNotes {
-    pub fn new(scale: Scale, octave_range: Range<i32>) -> Self {
+    pub fn new(scale: Scale, octave_range: Range<i8>) -> Self {
         Self {
             scale: scale.as_midi_notes_with_octave_range(octave_range),
             lastnotes: Vec::new(),
@@ -31,8 +31,10 @@ impl PatternNotes {
     }
 }
 
-impl NoteGenerator for PatternNotes {
-    fn gen(&mut self) -> Vec<u7> {
+impl Generator for PatternNotes {
+    type Item = Vec<u7>;
+
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
         let raw_dist = self.gen_dist();
         //display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
@@ -41,17 +43,17 @@ impl NoteGenerator for PatternNotes {
 
         println!(" {} \n", n);
         self.lastnotes.push(n);
-        vec![u7::new(self.scale[n].try_into().unwrap())]
+        (vec![u7::new(self.scale[n].try_into().unwrap())], gen_models)
     }
 }
 
 pub struct NearNotes {
-    scale: Vec<i32>,
+    scale: Vec<u7>,
     lastnotes: Vec<usize>,
 }
 
 impl NearNotes {
-    pub fn new(scale: Scale, octave_range: Range<i32>) -> Self {
+    pub fn new(scale: Scale, octave_range: Range<i8>) -> Self {
         Self {
             scale: scale.as_midi_notes_with_octave_range(octave_range),
             lastnotes: Vec::new(),
@@ -73,8 +75,10 @@ impl NearNotes {
     }
 }
 
-impl NoteGenerator for NearNotes {
-    fn gen(&mut self) -> Vec<u7> {
+impl Generator for NearNotes {
+    type Item = Vec<u7>;
+
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
         let raw_dist = self.gen_dist();
         display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
@@ -83,29 +87,74 @@ impl NoteGenerator for NearNotes {
 
         println!(" {} \n", n);
         self.lastnotes.push(n);
-        vec![u7::new(self.scale[n].try_into().unwrap())]
+        (vec![u7::new(self.scale[n].try_into().unwrap())], gen_models)
     }
 }
 
 pub struct RandomNotes {
-    scale: Vec<i32>,
+    scale: Vec<u7>,
 }
 
 impl RandomNotes {
-    pub fn new(scale: Scale, octave_range: Range<i32>) -> Self {
+    pub fn new(scale: Scale, octave_range: Range<i8>) -> Self {
         Self {
             scale: scale.as_midi_notes_with_octave_range(octave_range),
         }
     }
 }
 
-impl NoteGenerator for RandomNotes {
-    fn gen(&mut self) -> Vec<u7> {
+impl Generator for RandomNotes {
+    type Item = Vec<u7>;
+
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
         let dist = distributions::Uniform::<usize>::new(0, self.scale.len());
-        vec![u7::new(
-            self.scale[dist.sample(&mut rand::thread_rng())]
-                .try_into()
-                .unwrap(),
-        )]
+        (
+            vec![u7::new(
+                self.scale[dist.sample(&mut rand::thread_rng())]
+                    .try_into()
+                    .unwrap(),
+            )],
+            gen_models,
+        )
+    }
+}
+
+pub struct NotesDependingBar {
+    notes: Vec<Vec<u7>>,
+}
+
+impl NotesDependingBar {
+    pub fn new(notes: Vec<Vec<u7>>) -> Self {
+        Self { notes }
+    }
+}
+
+impl Generator for NotesDependingBar {
+    type Item = Vec<u7>;
+
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
+        (
+            self.notes[(gen_models.time.get_bars() % self.notes.len() as i32) as usize].clone(),
+            gen_models,
+        )
+    }
+}
+
+pub struct OneNote {
+    note: Vec<u7>,
+}
+impl OneNote {
+    pub fn new(note: Vec<u8>) -> Self {
+        Self {
+            note: (note.iter().map(|n| u7::new(*n)).collect()),
+        }
+    }
+}
+
+impl Generator for OneNote {
+    type Item = Vec<u7>;
+
+    fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
+        (self.note.clone(), gen_models)
     }
 }
