@@ -25,7 +25,7 @@ impl PatternNotes {
         if let Some(indexes) = self.lastnotes.iter().find_all(|&&x| x == last_note) {
             indexes
                 .iter()
-                .for_each(|i| result[self.lastnotes[i + 1]] *= 1.2)
+                .for_each(|i| result[*self.lastnotes.get(i + 1).unwrap_or(&0)] *= 1.2)
         }
         result
     }
@@ -34,7 +34,7 @@ impl PatternNotes {
 impl NoteGenerator for PatternNotes {
     fn gen(&mut self) -> Vec<u7> {
         let raw_dist = self.gen_dist();
-        display_distributtion(&raw_dist);
+        //display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
 
         let n: usize = dist.sample(&mut rand::thread_rng());

@@ -64,7 +64,7 @@ pub fn step_as_freq(step: &Step, key_note: f32) -> f32 {
 }
 
 fn chromatic_step_as_freq(cstep: i32, key_note: f32) -> f32 {
-    (2.0 as f32).powf(cstep as f32 / 12.0) * key_note
+    2.0_f32.powf(cstep as f32 / 12.0) * key_note
 }
 
 pub fn octave(n: i32, o: i32) -> i32 {
