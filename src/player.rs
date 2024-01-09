@@ -31,9 +31,9 @@ where
 
             let moment: Moment = (*self.generator).next().unwrap();
 
-            println!("{:?}", timer.elapsed());
-
             if !moment.is_empty() {
+                println!("{:?}", timer.elapsed());
+
                 self.timer.sleep(counter);
                 counter = 0;
 

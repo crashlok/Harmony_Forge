@@ -1,5 +1,5 @@
 use super::Generator;
-use crate::{display_distributtion, models::Models, note::Scale};
+use crate::{models::Models, note::Scale};
 use find_all::FindAll;
 use midly::num::u7;
 use rand::distributions::{self, Distribution};
@@ -36,12 +36,10 @@ impl Generator for PatternNotes {
 
     fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
         let raw_dist = self.gen_dist();
-        //display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
 
         let n: usize = dist.sample(&mut rand::thread_rng());
 
-        println!(" {} \n", n);
         self.lastnotes.push(n);
         (vec![u7::new(self.scale[n].try_into().unwrap())], gen_models)
     }
@@ -80,12 +78,10 @@ impl Generator for NearNotes {
 
     fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
         let raw_dist = self.gen_dist();
-        display_distributtion(&raw_dist);
         let dist = distributions::WeightedIndex::new(raw_dist).unwrap();
 
         let n: usize = dist.sample(&mut rand::thread_rng());
 
-        println!(" {} \n", n);
         self.lastnotes.push(n);
         (vec![u7::new(self.scale[n].try_into().unwrap())], gen_models)
     }
