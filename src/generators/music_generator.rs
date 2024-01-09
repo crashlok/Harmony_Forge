@@ -47,13 +47,19 @@ impl Iterator for MusicGenerator {
 
         let (result, new_models) = self.gen_list.iter_mut().fold(
             (Vec::new(), self.models.clone()),
-            |(result, input_models), generator| {
+            |(mut result, input_models), generator| {
                 let (mut events, end_models) = (**generator).gen(input_models);
-                events.append(&mut result.clone());
+                events.append(&mut result);
                 (events, end_models)
             },
         );
         self.models = new_models;
         Some(Moment { events: result })
+    }
+}
+
+impl Default for MusicGenerator {
+    fn default() -> Self {
+        Self::new()
     }
 }

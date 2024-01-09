@@ -24,5 +24,5 @@ pub fn display_distributtion(input: &[f64]) {
     }
 }
 pub fn bpm_to_micros_per_beat(bpm: u16) -> u32 {
-    ((60 as f64 / bpm as f64) * 1000000.0) as u32
+    ((60_f64 / bpm as f64) * 1000000.0) as u32
 }

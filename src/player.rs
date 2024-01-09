@@ -1,5 +1,6 @@
 use midir::MidiOutputConnection;
 use nodi::{timers::Ticker, Event, Moment, Timer};
+use std::time::Instant;
 
 #[derive()]
 pub struct Player<I>
@@ -26,7 +27,12 @@ where
     pub fn play(&mut self) {
         let mut counter = 0_u32;
         loop {
+            let timer = Instant::now();
+
             let moment: Moment = (*self.generator).next().unwrap();
+
+            println!("{:?}", timer.elapsed());
+
             if !moment.is_empty() {
                 self.timer.sleep(counter);
                 counter = 0;

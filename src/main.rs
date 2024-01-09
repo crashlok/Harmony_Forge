@@ -22,7 +22,7 @@ fn main() {
     for i in &out.ports() {
         dbg!(out.port_name(i).as_deref().unwrap_or("<no device name>"));
     }
-    let port: &MidiOutputPort = &out.ports()[0];
+    let port: &MidiOutputPort = &out.ports()[1];
     let con = out.connect(port, "HarmonyForgeOut").expect("very bad");
 
     let (_tx, handle): (mpsc::Sender<()>, thread::JoinHandle<()>) = MusicGenerator::new()

@@ -18,3 +18,9 @@ impl Models {
         }
     }
 }
+
+impl Default for Models {
+    fn default() -> Self {
+        Self::new()
+    }
+}
