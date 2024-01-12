@@ -33,7 +33,7 @@ impl<N: Generator<Item = Vec<u7>>> Generator for OnBeatPattern<N> {
 
             res.append(&mut multiple_notes_off(
                 gen_models.playing.stop_all(self.channel),
-                u7::new(100),
+                u7::new(200),
                 self.channel,
             ));
 
@@ -43,7 +43,7 @@ impl<N: Generator<Item = Vec<u7>>> Generator for OnBeatPattern<N> {
                 end_models
                     .playing
                     .start_multiple(new_notes, input_models.time, self.channel),
-                u7::new(100),
+                u7::new(200),
                 self.channel,
             ));
 
@@ -77,7 +77,7 @@ impl<N: Generator<Item = Vec<u7>>, C: Fn(&Models) -> bool> Generator for OnClosu
 
             res.append(&mut multiple_notes_off(
                 gen_models.playing.stop_all(self.channel),
-                u7::new(100),
+                u7::new(200),
                 self.channel,
             ));
 
@@ -87,7 +87,7 @@ impl<N: Generator<Item = Vec<u7>>, C: Fn(&Models) -> bool> Generator for OnClosu
                 end_models
                     .playing
                     .start_multiple(new_notes, input_models.time, self.channel),
-                u7::new(100),
+                u7::new(200),
                 self.channel,
             ));
 

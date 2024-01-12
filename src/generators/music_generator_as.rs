@@ -2,20 +2,19 @@ use super::Gen;
 use crate::{models::Models, player::Player};
 use midir::MidiOutputConnection;
 use nodi::{timers::Ticker, Event, Moment};
-use std::{sync::mpsc, thread};
+use std::thread;
 
 pub struct MusicGeneratorAs {
     models: Models,
-    rx: Option<mpsc::Receiver<()>>,
-    sender: crossbeam_channel::Sender<Moment>,
+    sender: Option<crossbeam_channel::Sender<Moment>>,
     gen_list: Vec<Box<Gen<Vec<Event>>>>,
 }
 
 impl MusicGeneratorAs {
     pub fn new() -> Self {
-        MusicGenerator {
+        Self {
             models: Models::new(),
-            rx: None,
+            sender: None,
             gen_list: Vec::new(),
         }
     }
@@ -33,17 +32,17 @@ impl MusicGeneratorAs {
     ) -> (thread::JoinHandle<()>, thread::JoinHandle<()>) {
         self.models.time.set_time_signature(time_signature);
         let (tx, rx) = crossbeam_channel::bounded(3);
-        self.Sender = tx;
-        let mut player = Player::new(rx.iter(), con, t);
+        self.sender = Some(tx);
+        let mut player = Player::new(rx.clone().iter(), con, t);
         let handle = thread::spawn(move || player.play());
         let handle2 = thread::spawn(move || loop {
-            self.sender.send(self.next().unwrap)
+            self.sender.unwrap().send(self.next().unwrap()).unwrap();
         });
         (handle, handle2)
     }
 }
 
-impl Iterator for MusicGenerator {
+impl Iterator for MusicGeneratorAs {
     type Item = nodi::Moment;
 
     fn next(&mut self) -> Option<Self::Item> {

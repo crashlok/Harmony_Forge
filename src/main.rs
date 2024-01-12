@@ -73,7 +73,7 @@ fn main() {
             ],
         )))
         .add_generator(Box::new(OnClosurePattern::new(
-            |models| models.time.on_quarter() && models.time.get_quarters_i32() % 2 == 0,
+            |models| models.time.on_eight(),
             NearNotes::new(Scale::new_minor(60), 1..3),
             2,
         )))
