@@ -1,6 +1,7 @@
 use crate::models::Models;
 
 pub mod music_generator;
+pub mod music_generator_as;
 pub mod note_generator;
 pub mod pattern_generator;
 pub mod universal_generator;

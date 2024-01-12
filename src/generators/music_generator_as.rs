@@ -33,10 +33,13 @@ impl MusicGeneratorAs {
         self.models.time.set_time_signature(time_signature);
         let (tx, rx) = crossbeam_channel::bounded(3);
         self.sender = Some(tx);
-        let mut player = Player::new(rx.clone().iter(), con, t);
+        let mut player = Player::new(rx.as_mut().iter(), con, t);
         let handle = thread::spawn(move || player.play());
-        let handle2 = thread::spawn(move || loop {
-            self.sender.unwrap().send(self.next().unwrap()).unwrap();
+        let handle2 = thread::spawn(move || {
+            let mut s = self;
+            loop {
+                s.sender.clone().unwrap().send(s.next().unwrap()).unwrap();
+            }
         });
         (handle, handle2)
     }
