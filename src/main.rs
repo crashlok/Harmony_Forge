@@ -12,18 +12,14 @@ use harmony_forge::{
     probability_density_function,
     timers::TickerWithTime,
 };
-use midir::{MidiOutput, MidiOutputPort};
+use midir::{ConnectError, MidiOutput, MidiOutputConnection, MidiOutputPort};
 use midly::num::u7;
 use nodi::{self, timers::Ticker};
 use std::{sync::mpsc, thread, time::Duration};
+use dialoguer::FuzzySelect;
 
 fn main() {
-    let out: MidiOutput = midir::MidiOutput::new("harmony_forge").expect("very bad");
-    for i in &out.ports() {
-        dbg!(out.port_name(i).as_deref().unwrap_or("<no device name>"));
-    }
-    let port: &MidiOutputPort = &out.ports()[0];
-    let con = out.connect(port, "HarmonyForgeOut").expect("very bad");
+    let con = choose_connection(midir::MidiOutput::new("harmony_forge").expect("failed to instanciat output")).expect("failed to connect");
 
     let (_tx, handle): (mpsc::Sender<()>, thread::JoinHandle<()>) = MusicGenerator::new()
         .add_generator(Box::new(MultipleClosure::new(
@@ -106,3 +102,18 @@ fn _probability_test() {
         println!();
     }
 }
+fn choose_connection(out:MidiOutput)-> Result<MidiOutputConnection, ConnectError<MidiOutput>>{
+    println!();
+    let port_names = out.ports().iter().map(|port|out.port_name(port).unwrap_or("<no device name>".to_owned())).collect::<Vec<String>>();
+    let choosen_port_index =
+        FuzzySelect::new()
+             .with_prompt("choose port")
+             .items(&port_names)
+             .interact()
+             .expect("failed to choose");
+
+    let port: &MidiOutputPort = &out.ports()[choosen_port_index];
+    println!();
+    out.connect(port, "HarmonyForgeOut")
+}
+

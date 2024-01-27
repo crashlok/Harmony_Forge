@@ -12,3 +12,4 @@ midly = "0.5.3"
 nodi = "0.19.2"
 find_all = "2.0.0"
 crossbeam-channel = "0.5.11"
+dialoguer = { version = "0.11.0", features = ["fuzzy-select"] }
