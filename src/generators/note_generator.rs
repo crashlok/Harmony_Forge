@@ -1,4 +1,4 @@
-use super::{Gen,Generator};
+use super::{Gen, Generator};
 use crate::{models::Models, note::Scale};
 use find_all::FindAll;
 use midly::num::u7;
@@ -41,7 +41,7 @@ impl Generator for PatternNotes {
         let n: usize = dist.sample(&mut rand::thread_rng());
 
         self.lastnotes.push(n);
-        (vec![u7::new(self.scale[n].try_into().unwrap())], gen_models)
+        (vec![self.scale[n]], gen_models)
     }
 }
 
@@ -83,7 +83,7 @@ impl Generator for NearNotes {
         let n: usize = dist.sample(&mut rand::thread_rng());
 
         self.lastnotes.push(n);
-        (vec![u7::new(self.scale[n].try_into().unwrap())], gen_models)
+        (vec![self.scale[n]], gen_models)
     }
 }
 
@@ -105,11 +105,7 @@ impl Generator for RandomNotes {
     fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
         let dist = distributions::Uniform::<usize>::new(0, self.scale.len());
         (
-            vec![u7::new(
-                self.scale[dist.sample(&mut rand::thread_rng())]
-                    .try_into()
-                    .unwrap(),
-            )],
+            vec![self.scale[dist.sample(&mut rand::thread_rng())]],
             gen_models,
         )
     }
@@ -155,22 +151,22 @@ impl Generator for OneNote {
     }
 }
 
-struct UniversalNotes{
-    _modifiers: Vec<Box<Gen<[u7;128]>>>
+struct UniversalNotes {
+    _modifiers: Vec<Box<Gen<[u7; 128]>>>,
 }
 
 impl UniversalNotes {
-   fn _new()->Self{
-
-    Self{
-        _modifiers : Vec::new()
-    }} 
+    fn _new() -> Self {
+        Self {
+            _modifiers: Vec::new(),
+        }
+    }
 }
 
 impl Generator for UniversalNotes {
-   type Item = Vec<u7>; 
-    
+    type Item = Vec<u7>;
+
     fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
-       (Vec::new(),gen_models) 
+        (Vec::new(), gen_models)
     }
 }
