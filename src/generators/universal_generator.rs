@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use super::{Gen, Generator};
 use crate::models::Models;
 pub struct MultipleClosure<I, C: Fn(&Models) -> usize> {
@@ -22,22 +24,29 @@ impl<I, C: Fn(&Models) -> usize> Generator for MultipleClosure<I, C> {
     }
 }
 
-fn add_arrays<const N: usize, T: Default + Copy>(mut input: Vec<[T; N]>) -> [T; N]
+fn add_arrays<const N: usize, T: Default + Copy + Debug>(mut input: Vec<[T; N]>) -> [T; N]
 where
-    for<'a> &'a mut T: std::ops::AddAssign<&'a T>,
+    T: std::ops::AddAssign<T>,
 {
+    dbg!(&input);
+    dbg!(&input.len());
+
     return match input.len() {
         0 => [T::default(); N],
         1 => *input.first().unwrap(),
         _ => add_arrays({
             let input2 = input.clone();
-            input
-                .first_mut()
+            input.first_mut() = input
+                .first()
                 .unwrap()
-                .iter_mut()
+                .iter()
                 .zip(input2.last().unwrap())
-                .for_each(|(mut a, b)| a += b);
+                .map(|(&a, &b)| a += b)
+                .collect::<Vec<T>>()
+                .try_into()
+                .unwrap();
             input.pop();
+            dbg!(&input);
             input
         }),
     };
@@ -49,8 +58,8 @@ impl<const N: usize, I> MultipleAdd<N, I> {}
 
 impl<const N: usize, I> Generator for MultipleAdd<N, I>
 where
-    for<'a> &'a mut I: std::ops::AddAssign<&'a I>,
-    I: Default + Copy,
+    I: std::ops::AddAssign<I>,
+    I: Default + Copy + Debug,
 {
     type Item = [I; N];
     fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
@@ -63,5 +72,27 @@ where
                     (res, models)
                 });
         (add_arrays(results), new_models)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn adds_arrays() {
+        let a = [1, 2, 3, 4, 5];
+        let _o = [0, 0, 0, 0, 0];
+        let _b = [1, 1, 1, 1, 1];
+        //assert_eq!(add_arrays(vec![a]), a);
+        assert_eq!(add_arrays(vec![a, a]), [2, 4, 6, 8, 10]);
+        /*assert_eq!(add_arrays(vec![a, a, a]), [3, 6, 9, 12, 15]);
+            assert_eq!(add_arrays(vec![a, o]), a);
+            assert_eq!(
+                add_arrays(vec![a, a, b, a, o, o]),
+                add_arrays(vec![a, a, b, a])
+            );
+            assert_eq!(add_arrays(vec![a, b]), [2, 3, 4, 5, 6]);
+        */
     }
 }
