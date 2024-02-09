@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![feature(flagtype_alias_impl_trait)]
 
 use std::f64::consts;
 

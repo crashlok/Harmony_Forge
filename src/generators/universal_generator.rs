@@ -3,24 +3,29 @@ use std::fmt::Debug;
 use super::{Gen, Generator};
 use crate::models::Models;
 pub struct MultipleClosure<I, C: Fn(&Models) -> usize> {
-    generators: Vec<Box<Gen<I>>>,
+    gen_list: Vec<Box<Gen<I>>>,
     indexing_closure: C,
 }
 
 impl<I, C: Fn(&Models) -> usize> MultipleClosure<I, C> {
-    pub fn new(indexing_closure: C, generators: Vec<Box<Gen<I>>>) -> Self {
+    pub fn new(indexing_closure: C) -> Self {
         Self {
-            generators,
+            gen_list: Vec::new(),
             indexing_closure,
         }
+    }
+
+    pub fn add_generator(mut self, gen: impl 'static + Generator<Item = I> + Send) -> Self {
+        self.gen_list.push(Box::new(gen));
+        self
     }
 }
 
 impl<I, C: Fn(&Models) -> usize> Generator for MultipleClosure<I, C> {
     type Item = I;
     fn gen(&mut self, gen_models: Models) -> (Self::Item, Models) {
-        let index = (self.indexing_closure)(&gen_models) % self.generators.len();
-        (*(self.generators[index])).gen(gen_models)
+        let index = (self.indexing_closure)(&gen_models) % self.gen_list.len();
+        (*(self.gen_list[index])).gen(gen_models)
     }
 }
 
