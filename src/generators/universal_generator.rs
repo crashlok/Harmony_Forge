@@ -71,10 +71,22 @@ where
     result
 }
 
-struct MultipleAdd<const N: usize, I> {
+#[derive(Copy)]
+pub struct MultipleAdd<const N: usize, I> {
     generators: Vec<Box<Gen<[I; N]>>>,
 }
-impl<const N: usize, I> MultipleAdd<N, I> {}
+impl<const N: usize, I> MultipleAdd<N, I> {
+    pub fn new() -> Self {
+        Self {
+            generators: Vec::new(),
+        }
+    }
+
+    pub fn add_generator(mut self, gen: impl 'static + Generator<Item = [I; N]> + Send) -> Self {
+        self.generators.push(Box::new(gen));
+        self
+    }
+}
 
 impl<const N: usize, I> Generator for MultipleAdd<N, I>
 where

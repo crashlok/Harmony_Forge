@@ -1,4 +1,4 @@
-use super::{Gen, Generator};
+use super::{universal_generator::MultipleAdd, Generator};
 use crate::{models::Models, note::Scale};
 use find_all::FindAll;
 use midly::num::u7;
@@ -152,14 +152,22 @@ impl Generator for OneNote {
 }
 
 struct UniversalNotes {
-    _modifiers: Vec<Box<Gen<[u7; 128]>>>,
+    modifiers: MultipleAdd<128, i32>,
 }
 
 impl UniversalNotes {
     fn _new() -> Self {
         Self {
-            _modifiers: Vec::new(),
+            modifiers: MultipleAdd::new(),
         }
+    }
+
+    fn add_modifier(
+        mut self,
+        modifier: impl 'static + Generator<Item = [i32; 128]> + Send,
+    ) -> Self {
+        self.modifiers = self.modifiers.clone().add_generator(modifier);
+        self
     }
 }
 

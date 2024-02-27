@@ -1,4 +1,4 @@
-use super::Gen;
+use super::{Gen, Generator};
 use crate::{models::Models, player::Player};
 use midir::MidiOutputConnection;
 use nodi::{timers::Ticker, Event, Moment};
@@ -19,8 +19,11 @@ impl MusicGenerator {
         }
     }
 
-    pub fn add_generator(mut self, generator: Box<Gen<Vec<Event>>>) -> Self {
-        self.gen_list.push(generator);
+    pub fn add_generator(
+        mut self,
+        generator: impl 'static + Generator<Item = Vec<Event>> + Send,
+    ) -> Self {
+        self.gen_list.push(Box::new(generator));
         self
     }
 

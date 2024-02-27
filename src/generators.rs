@@ -9,7 +9,6 @@ pub trait Generator {
     fn gen(&mut self, gen_models: Models) -> (Self::Item, Models);
 }
 
-type ImplGen<I> = impl Generator<Item = I> + Send;
 type Gen<I> = dyn Generator<Item = I> + Send;
 
 fn midi_massage_event(message: midly::MidiMessage, channel: midly::num::u4) -> nodi::Event {
